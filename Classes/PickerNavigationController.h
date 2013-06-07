@@ -9,6 +9,6 @@
 #import <UIKit/UIKit.h>
 #import "MapPickerViewController.h"
 
-@interface PickerNavigationController : UINavigationController
+@interface PickerNavigationController : UINavigationController <UIViewControllerRestoration>
 
 @end

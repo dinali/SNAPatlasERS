@@ -80,8 +80,6 @@
 {
     // Releases the view if it doesn't have a superview.
     [super didReceiveMemoryWarning];
-    
-    // Release any cached data, images, etc that aren't in use.
 }
 
 #pragma mark - View lifecycle
@@ -89,7 +87,8 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	  
+    [self setRestorationIdentifier:@"tocVC"];
+    self.restorationClass = [self class];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -113,10 +112,6 @@
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
-- (void)dealloc
-{
-    self.popOverController = nil;
-}
 
 #pragma mark -
 #pragma mark LayerInfoCellDelegate
@@ -358,5 +353,10 @@
     [self.tableView reloadData];
 }
 
++(UIViewController*)viewControllerWithRestorationIdentifierPath:(NSArray *)identifierComponents coder:(NSCoder *)coder{
+    
+    UIViewController * tocViewController = [[TOCViewController alloc]initWithNibName:@"TOCViewController" bundle:nil];
+    return tocViewController;
+}
 
 @end

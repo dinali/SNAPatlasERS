@@ -28,13 +28,22 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    // Do any additional setup after loading the view from its nib.
+    [self setRestorationIdentifier:@"PickerNavigation"];
+    self.restorationClass = [self class];
 }
 
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+#pragma mark - setup
+
++(UIViewController*)viewControllerWithRestorationIdentifierPath:(NSArray *)identifierComponents coder:(NSCoder *)coder{
+    
+    UIViewController * pickerController = [[PickerNavigationController alloc]initWithNibName:@"pickerController" bundle:nil];
+    return pickerController;
 }
 
 @end

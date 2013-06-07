@@ -18,14 +18,14 @@
 
 -(NSArray*) getTitles{
     
-    _titleArray = [NSArray arrayWithObjects:@"Benefits", @"Participation", @"Participation Per Person in Poverty", @"Socioeconomic indicators", nil];
-    return _titleArray;
+    self.titleArray = [NSArray arrayWithObjects:@"Benefits", @"Participation", @"Participation Per Person in Poverty", @"Socioeconomic indicators", nil];
+    return self.titleArray;
 }
 
 -(NSArray*) getImages{
     
-    _imageArray = [NSArray arrayWithObjects:@"SNAPbenefits2010.png", @"SNAPparticipation2010.png", @"SNAPperperson2010.png", @"SocioeconomicChildPoverty2010.png", nil];
-    return _imageArray;
+    self.imageArray = [NSArray arrayWithObjects:@"SNAPbenefits2010.png", @"SNAPparticipation2010.png", @"SNAPperperson2010.png", @"SocioeconomicChildPoverty2010.png", nil];
+    return self.imageArray;
 }
 
 // if we add the other Atlases, add the related URLS here
@@ -34,9 +34,31 @@
     if([mapName isEqual: @"SNAP"])
     {
         NSString *siteString = @"http://www.ers.usda.gov/data-products/supplemental-nutrition-assistance-program-(snap)-data-system.aspx";
-        _pageURL = [NSURL URLWithString:siteString];
+        self.pageURL = [NSURL URLWithString:siteString];
     }
-    return _pageURL;
+    return self.pageURL;
+}
+
+// returns the ERS map service url so the map display can be changed when the user selects a map using Change Map
+-(NSURL*) getMapService:mapName{
+    
+    NSString *siteString = nil;
+    if([mapName isEqual: @"SNAP"])
+    {
+        siteString = @"http://gis2.ers.usda.gov/ArcGIS/rest/services/snap_Benefits/MapServer";
+    }
+    else if([mapName isEqual:@"Participation"]){
+        siteString = @"http://gis2.ers.usda.gov/ArcGIS/rest/services/snap_Participation/MapServer";
+    }
+    else if([mapName isEqual:@"Participation Per Person in Poverty"]){
+        siteString = @"http://gis2.ers.usda.gov/ArcGIS/rest/services/snap_Participation_Poverty/MapServer";
+    }
+    else if([mapName isEqual:@"Socioeconomic indicators"]){
+        siteString = @"http://gis.ers.usda.gov/ArcGIS/rest/services/fa_socioeconomic/MapServer";
+    }
+
+    self.pageURL = [NSURL URLWithString:siteString];
+    return self.pageURL;
 }
 
 /* ERS does not have one line descriptions for the individual SNAP maps, placeholder */
@@ -46,8 +68,6 @@
 //    return blurbArray;
 //}
 
-
-// Initialize thumbnails
 
 
 @end

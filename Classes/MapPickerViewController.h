@@ -10,11 +10,11 @@
 #import "Map.h"
 #import "MainViewController.h"
 
-@interface MapPickerViewController : UITableViewController
+@interface MapPickerViewController : UITableViewController <UIViewControllerRestoration>
 
 @property (strong,nonatomic) Map* aMap;
 @property (strong,nonatomic) UIBarButtonItem *backButton;
 
--(void)goBack; // go back button
+-(void)goBack:(id)sender; // go back button
 
 @end

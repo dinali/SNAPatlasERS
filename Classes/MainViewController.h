@@ -17,6 +17,7 @@
 
 #import <UIKit/UIKit.h>
 #import <ArcGIS/ArcGIS.h>
+#import <CoreLocation/CoreLocation.h>
 #import "LegendDataSource.h"
 #import "LegendViewController.h"
 #import "Reachability.h"
@@ -26,7 +27,7 @@
 #import "PickerNavigationController.h"
 #import "Map.h"
 
-@interface MainViewController : UIViewController <AGSMapViewLayerDelegate, AGSLocatorDelegate, AGSCalloutDelegate, AGSMapViewTouchDelegate, AGSIdentifyTaskDelegate> {
+@interface MainViewController : UIViewController <AGSMapViewLayerDelegate, AGSLocatorDelegate, AGSCalloutDelegate, AGSMapViewTouchDelegate, AGSIdentifyTaskDelegate, UIViewControllerRestoration, CLLocationManagerDelegate> {
     
 	AGSMapView *_mapView;
 	UIButton* _infoButton;
@@ -68,24 +69,33 @@
 @property (nonatomic, retain) AGSPoint* mappoint;
 @property (nonatomic, retain) AGSGraphic *graphic;
 
-//this is the map level layer info object, acting as the invisible root of the entire tree.
-//@property (nonatomic, strong) AGSMapServiceLayerInfo *mapViewLevelLayerInfo;
 @property NSInteger *dynamiclayerID;
-@property (strong, nonatomic) IBOutlet UILabel *notificationLabel;
+@property (weak, nonatomic) IBOutlet UILabel *notificationLabel;
 
 // display the activity indicator Map is Loading
-@property (strong, nonatomic) IBOutlet UILabel *activityLabel;
+@property (weak, nonatomic) IBOutlet UILabel *activityLabel;
 @property (strong, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
 
 // name of the map to load
 @property (strong,nonatomic) NSString * mapName;
+@property (strong, nonatomic) Map * ersMap;
+
+// location
+@property (strong,nonatomic) CLLocationManager *locationManager;
+@property (strong,nonatomic) CLLocation *startLocation;
+
+@property (weak, nonatomic) IBOutlet UIBarButtonItem *findMeButton;
+
+@property (strong,nonatomic) NSURL *ersMapServiceURL;
+
+/****** METHODS ******/
 
 - (IBAction)presentTableOfContents:(id)sender;  // display layers
 - (IBAction)presentLegendViewController:(id)sender; // display legend
 - (IBAction)showCurrentLocation:(id)sender; // click to display where you are
 - (IBAction)showWebDetails:(id)sender;
 
-- (void)changeMap:(id)sender;
+- (void)changeMap:(id)sender; // display TableViewController for choosing a different SNAP map
 
 
 @end

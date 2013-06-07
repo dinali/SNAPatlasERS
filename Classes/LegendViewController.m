@@ -19,6 +19,8 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    [self setRestorationIdentifier:@"legendVC"];
+    self.restorationClass = [self class];
 	//Hook up the table view with the data source to display legend
 	self.legendTableView.dataSource = self.legendDataSource;
 }
@@ -37,14 +39,17 @@
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
+     if(self.view!=nil){
+         self.legendTableView = nil;
+         self.legendDataSource = nil;
+         self.popOverController = nil;
+     }
 }
 
-- (void)viewDidUnload {
-    [self setLegendTableView:nil];
-    [super viewDidUnload];
-	self.legendTableView = nil;
-    self.legendDataSource = nil;
-    self.popOverController = nil;
++(UIViewController*)viewControllerWithRestorationIdentifierPath:(NSArray *)identifierComponents coder:(NSCoder *)coder{
+    
+    UIViewController * legendVC = [[LegendViewController alloc]initWithNibName:@"LegendViewController" bundle:nil];
+    return legendVC;
 }
 
 

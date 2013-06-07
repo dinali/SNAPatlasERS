@@ -11,10 +11,10 @@
 #import <UIKit/UIKit.h>
 #import "MainViewController.h"
 
-@interface WebsiteViewController : UIViewController
+@interface WebsiteViewController : UIViewController <UIViewControllerRestoration>
 
 @property (strong, nonatomic) IBOutlet UIWebView *webView;
-@property (strong, nonatomic) IBOutlet UIBarButtonItem *backButton;
+@property (weak, nonatomic) IBOutlet UIBarButtonItem *backButton;
 @property (strong, nonatomic) NSURL *pageURL; // passed from MainViewController;
 - (IBAction)goBack:(id)sender;
 

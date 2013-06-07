@@ -27,7 +27,7 @@
     self = [super initWithStyle:style];
     if (self) {
         // Custom initialization
-        self.title = @"USDA ERS";
+       // self.title = @"USDA ERS";
     }
     return self;
 }
@@ -35,22 +35,24 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    [self setRestorationIdentifier:@"MapPickerVC"];
+    self.restorationClass = [self class];
     
-    _aMap = [[Map alloc]init];
+    self.aMap = [[Map alloc]init];
     
-    tableDataArray = [_aMap getTitles];
-    imagesArray = [_aMap getImages];
-    webURL = [_aMap getURL:@"SNAP"];
+    tableDataArray = [self.aMap getTitles];
+    imagesArray = [self.aMap getImages];
+    webURL = [self.aMap getURL:@"SNAP"];
     
-    _backButton = [[UIBarButtonItem alloc] initWithTitle:@"Map"
+    self.backButton = [[UIBarButtonItem alloc] initWithTitle:@"Map"
                                                              style:UIBarButtonItemStylePlain
                                                             target:self
                                                             action:@selector(goBack:)];
     
-    [self.navigationItem setLeftBarButtonItem:_backButton animated:YES];
+    [self.navigationItem setLeftBarButtonItem:self.backButton animated:YES];
     
     self.title = @"Choose a map";    
-    self.navigationItem.leftBarButtonItem = _backButton;
+    self.navigationItem.leftBarButtonItem = self.backButton;
     
 }
 
@@ -66,7 +68,12 @@
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+     if(self.view!=nil){
+         self.aMap = nil;
+         tableDataArray = nil;
+         imagesArray = nil;
+         webURL = nil;
+     }
 }
 
 #pragma mark - Table view data source
@@ -99,24 +106,34 @@
 }
 
 
-
 #pragma mark - Table view delegate
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
  
-     MainViewController *mainVC = [[MainViewController alloc] initWithNibName:@"MainViewController" bundle:nil];
+    MainViewController *mainVC = [[MainViewController alloc] initWithNibName:@"MainViewController" bundle:nil];
     
-    // which map to load first?
-     NSInteger row = [[self tableView].indexPathForSelectedRow row];
+    NSInteger row = [[self tableView].indexPathForSelectedRow row];
     
-    Map *atlasMap = [[Map alloc]init];
-    NSArray *allTitlesArray = atlasMap.getTitles;
+    NSArray *allTitlesArray = self.aMap.getTitles;
     
     mainVC.mapName = [allTitlesArray objectAtIndex:row];
+
+    //NSString *nameOfmap = mainVC.mapName;
     
-     // Pass the selected object to the new view controller.
-    [self.navigationController pushViewController:mainVC animated:YES];
+    mainVC.ersMapServiceURL = [self.aMap getMapService:mainVC.mapName];
+    
+    // but we don't need the navigation controller anymore because MainViewController already has the navigation bar at the top
+    [self presentViewController:mainVC animated:YES completion:nil];
 }
+
+#pragma mark - setup
+
++(UIViewController*)viewControllerWithRestorationIdentifierPath:(NSArray *)identifierComponents coder:(NSCoder *)coder{
+    
+    UIViewController * mpViewController = [[MapPickerViewController alloc]initWithNibName:@"MapPickerViewController" bundle:nil];
+    return mpViewController;
+}
+
 
 @end

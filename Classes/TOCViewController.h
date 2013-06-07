@@ -16,7 +16,7 @@
 #import <UIKit/UIKit.h>
 #import <ArcGIS/ArcGIS.h>
 
-@interface TOCViewController : UIViewController
+@interface TOCViewController : UIViewController <UIViewControllerRestoration>
 
 
 @property (nonatomic, weak) UIPopoverController *popOverController;

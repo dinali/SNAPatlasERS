@@ -17,6 +17,12 @@
 @synthesize results = _results;
 @synthesize tableView = _tableView;
 
+-(void)viewDidLoad{
+    [super viewDidLoad];
+    [self setRestorationIdentifier:@"resultsVC"];
+    self.restorationClass = [self class];
+}
+
 - (IBAction)done:(id)sender
 {
     [self dismissModalViewControllerAnimated:YES];
@@ -85,6 +91,19 @@
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
     // Return YES for supported orientations
     return (YES);
+}
+
++(UIViewController*)viewControllerWithRestorationIdentifierPath:(NSArray *)identifierComponents coder:(NSCoder *)coder{
+    
+    UIViewController * resultsViewController = [[ResultsViewController alloc]initWithNibName:@"ResultsViewController" bundle:nil];
+    return resultsViewController;
+}
+
+-(void)didReceiveMemoryWarning{
+     if(self.view!=nil){
+         self.results = nil;
+         self.tableView = nil;
+     }
 }
 
 @end

@@ -29,29 +29,16 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-   // NSURL *url =  [NSURL URLWithString: @"http://www.ers.usda.gov"];
+    [self setTitle:@"Website"];
+    [self setRestorationIdentifier:@"websiteVC"];
+    self.restorationClass = [self class];
     
     NSURL *url = _pageURL;
     NSURLRequest *request = [NSURLRequest requestWithURL:url];
     
-    // NSLog(@"viewDidLoad url = %@", url);
-    
     [_webView loadRequest:request];
-    
-    [self setTitle:@"Website"];
 }
 
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
-- (void)viewDidUnload {
-    [self setWebView:nil];
-    [self setBackButton:nil];
-    [super viewDidUnload];
-}
 
 - (IBAction)goBack:(id)sender {
     
@@ -59,4 +46,23 @@
     
     [self presentViewController:mainVC animated:YES completion:nil];
 }
+
+#pragma mark - cleanup and startup
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+     if(self.view!=nil){
+         [self setWebView:nil];
+     }
+}
+
+
++(UIViewController*)viewControllerWithRestorationIdentifierPath:(NSArray *)identifierComponents coder:(NSCoder *)coder{
+    
+    UIViewController * webViewController = [[WebsiteViewController alloc]initWithNibName:@"WebsiteViewController" bundle:nil];
+    return webViewController;
+}
+
+
 @end

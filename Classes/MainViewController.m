@@ -35,11 +35,38 @@
 @synthesize activityLabel = _activityLabel;
 @synthesize notificationLabel = _notificationLabel;
 @synthesize mapName = _mapName;
+@synthesize locationManager = _locationManager;
+@synthesize startLocation = _startLocation;
+@synthesize findMeButton = _findMeButton;
+@synthesize ersMapServiceURL = _ersMapServiceURL;
+@synthesize ersMap = _ersMap;
 
 #define kTiledLayerURL @"http://gis2.ers.usda.gov/ArcGIS/rest/services/Background_Cache/MapServer"
-#define kDynamicMapServiceURL @"http://gis2.ers.usda.gov/ArcGIS/rest/services/snap_Benefits/MapServer"
+//#define kDynamicMapServiceURL @"http://gis2.ers.usda.gov/ArcGIS/rest/services/snap_Benefits/MapServer"
 #define kMapServiceURL @"http://gis2.ers.usda.gov/ArcGIS/rest/services/Reference2/MapServer" // states
 
+- (id)init
+{
+    self = [super init];
+    //if (self == nil) {
+        _mapName = @"http://gis2.ers.usda.gov/ArcGIS/rest/services/snap_Benefits/MapServer";
+    //}
+    NSLog(@"init mapName = %@", _mapName);
+    return self;
+}
+
+// receive mapName passed from other VC?
+-(id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:@"MainViewController" bundle:[NSBundle mainBundle]];
+    
+    if(self){
+        //_mapName = @"http://gis2.ers.usda.gov/ArcGIS/rest/services/snap_Benefits/MapServer";
+        //  ersMapServiceURL =
+    }
+    NSLog(@"initWithNibName _ersMapServiceURLe = %@", _ersMapServiceURL);
+    return self;
+}
 
 // occurs After viewDidLoad
 - (void) viewWillAppear:(BOOL)animated {
@@ -47,7 +74,7 @@
     NSLog(@"viewWillAppear called");
 }
 
-- (IBAction)showCurrentLocation
+- (IBAction)showCurrentLocation:(id)sender
 {
     [self.mapView centerAtPoint:[self.mapView.locationDisplay mapLocation] animated:YES];
     self.mapView.locationDisplay.autoPanMode = AGSLocationDisplayAutoPanModeDefault;
@@ -56,7 +83,11 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    // SET PROPERTIES
     [self setTitle:@"Map View"];
+    [self setRestorationIdentifier:@"mainVC"];
+    self.restorationClass = [self class];
     
     NSLog(@"map to show = %@", _mapName);
     
@@ -68,11 +99,11 @@
         
         // MAP IS LOADING
         
-        _activityIndicator.hidden= NO;
-        [_activityIndicator startAnimating];
+        self.activityIndicator.hidden= NO;
+        [self.activityIndicator startAnimating];
         
         // MAP IS LOADING:this hard codes the length of time to display the indicator, that's not such a good approach because the network time might vary; this is the only place it works to call the displayIndicator
-        [self performSelector:@selector(displayIndicator)withObject:nil afterDelay:20.0]; // 10 seconds
+        [self performSelector:@selector(stopIndicator)withObject:nil afterDelay:15.0]; // 10 seconds
         
         // LOAD LAYERS
         
@@ -86,10 +117,17 @@
         AGSTiledMapServiceLayer *tiledLyr = [AGSTiledMapServiceLayer tiledMapServiceLayerWithURL:mapUrl];
         [self.mapView addMapLayer:tiledLyr withName:@"Base Map"];
         
-        NSURL *mapUrl3 = [NSURL URLWithString:kDynamicMapServiceURL]; // ERS SNAP
+        /* LOAD DYNAMIC MAP, default is Benefits */
+        
+        if(self.mapName.length == 0){
+            self.ersMapServiceURL = [NSURL URLWithString:@"http://gis2.ers.usda.gov/ArcGIS/rest/services/snap_Benefits/MapServer"];
+        }
+        else{
+            NSLog(@"map URL = %@", self.ersMapServiceURL); // use the value passed from MapPickerVC
+        }
         
         NSError *error = nil;
-        AGSMapServiceInfo *info = [AGSMapServiceInfo mapServiceInfoWithURL:mapUrl3 error:&error];
+        AGSMapServiceInfo *info = [AGSMapServiceInfo mapServiceInfoWithURL:self.ersMapServiceURL error:&error];
         
         AGSDynamicMapServiceLayer* layer = [AGSDynamicMapServiceLayer dynamicMapServiceLayerWithMapServiceInfo: info];
         
@@ -103,9 +141,9 @@
             layer.opacity = .8;
         }
         
-        NSLog(@"before adding Snap layer");
+    NSLog(@"before adding Snap layer");
         [self.mapView addMapLayer:layer withName:@"Snap Benefits"];
-        NSLog(@"after adding Snap layer");
+    NSLog(@"after adding Snap layer");
         
         NSURL *stateMapUrl = [NSURL URLWithString:kMapServiceURL];
         AGSDynamicMapServiceLayer *dynamicLyr = [AGSDynamicMapServiceLayer dynamicMapServiceLayerWithURL:stateMapUrl];
@@ -140,16 +178,16 @@
         //Initialize the legend view controller
         //This will be displayed when user clicks on the info button
         
-      self.legendViewController = [[LegendViewController alloc] initWithNibName:@"LegendViewController" bundle:nil];
+        self.legendViewController = [[LegendViewController alloc] initWithNibName:@"LegendViewController" bundle:nil];
         self.legendViewController.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
         
         self.legendViewController.legendDataSource = self.legendDataSource;
         
         // ADDED FOR POPUP BY LOCATION
-        _mapView.touchDelegate = self;
+        self.mapView.touchDelegate = self;
         
         //create identify task
-        self.identifyTask = [AGSIdentifyTask identifyTaskWithURL:[NSURL URLWithString:kDynamicMapServiceURL]];
+        self.identifyTask = [AGSIdentifyTask identifyTaskWithURL:[NSURL URLWithString:self.mapName ]];
         self.identifyTask.delegate = self;
         
         //create identify parameters
@@ -157,6 +195,15 @@
         
         self.mapView.showMagnifierOnTapAndHold = YES;
         self.mapView.allowMagnifierToPanMap = YES;
+        
+        // CCLocationManager
+        /* not used, can be used to find distance between points */
+        self.locationManager = [[CLLocationManager alloc]init];
+        self.locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+        self.locationManager.delegate = self;
+        [self.locationManager startUpdatingLocation];
+        self.startLocation = nil;
+        
     }
     else{
         NSLog(@"main viewDidLoad:no wifi available");
@@ -171,26 +218,9 @@
     }
 }
 
-/*-(void)loadView{
-     UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithTitle:@"Change Map"
-                                                             style:UIBarButtonItemStylePlain
-                                                            target:self
-                                                            action:@selector(changeMap:)];
-    
-    [self.navigationItem setLeftBarButtonItem:item animated:YES];
-    
-    UIBarButtonItem *itemDetails = [[UIBarButtonItem alloc] initWithTitle:@"Map Details"
-                                                                    style:UIBarButtonItemStylePlain
-                                                                   target:self
-                                                                   action:@selector(showWebDetails:)];
-    
-    [self.navigationItem setRightBarButtonItem:itemDetails animated:YES];
-}
-*/
 #pragma mark -
 #pragma mark Check for Internet
 
-// ONLY CHECK ERS, assumes ESRI will be available
 -(BOOL) checkForInternet{
     
     /* Test for Internet Connection, this is the only URL that works for this purpose */
@@ -205,6 +235,14 @@
 	}
 	return internet;
 }
+
+//-(NSURL*) getDefaultMapURL{
+//    
+//    if(_mapName.length == 0){
+//        self.ersMapServiceURL = @"http://gis2.ers.usda.gov/ArcGIS/rest/services/snap_Benefits/MapServer";
+//    }
+//    return self.ersMapServiceURL;
+//}
 
 
 /* NOT USED */
@@ -255,10 +293,10 @@
 #pragma mark Map is Loading:UIActivityIndicatorView
 
 // stop the spinner for map is loading
--(void) displayIndicator{
+-(void) stopIndicator{
     
-    [_activityIndicator stopAnimating];
-    _activityLabel.hidden = YES;
+    [self.activityIndicator stopAnimating];
+    self.activityLabel.hidden = YES;
 }
 
 #pragma mark -
@@ -538,6 +576,9 @@
     [self presentViewController:webVC animated:YES completion:nil];
 }
 
+- (IBAction)showPhoneLocation:(id)sender {
+}
+
 /* display the UITableViewController that shows
  * the map options
 */
@@ -550,29 +591,48 @@
     [self presentViewController:pickerNC animated:YES completion:nil];
 }
 
+#pragma mark - cleanup and startup
+
++(UIViewController*)viewControllerWithRestorationIdentifierPath:(NSArray *)identifierComponents coder:(NSCoder *)coder{
+    
+    UIViewController * mainViewController = [[MainViewController alloc]initWithNibName:@"MainViewController" bundle:nil];
+    return mainViewController;
+}
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
     return YES;
 }
 
+
+// probably unecessary in iOS6
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
-}
-
-- (void)viewDidUnload {
-
-    [self setLegendButton:nil];
-    [self setActivityLabel:nil];
-    [self setActivityIndicator:nil];
-    [self setNotificationLabel:nil];
-   // [self setShowDetailsButton:nil];
-   
-	self.mapView = nil;
-	self.infoButton = nil;
-    self.tocViewController = nil;
-    if([[AGSDevice currentDevice] isIPad])
+    
+    if(self.view!=nil){
+        internetReachable = nil;
+        reach = nil;
+        wifiReach = nil;
+        self.mapView = nil;
+    
+        self.locationManager = nil;
+        self.startLocation = nil;
+    
+        if([[AGSDevice currentDevice] isIPad])
         self.popOverController = nil;
-     [super viewDidUnload];
+        [self setFindMeButton:nil];
+    
+        self.graphicsLayer = nil;
+        self.locator = nil;
+        self.calloutTemplate = nil;
+        self.legendDataSource = nil;
+        self.identifyTask = nil;
+        self.identifyParams = nil;
+        self.mappoint = nil;
+        self.graphic = nil;
+    
+        NSLog(@"didReceiveMemoryWarning in MainVC");
+    }
 }
+
 
 @end

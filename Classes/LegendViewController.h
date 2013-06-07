@@ -16,7 +16,7 @@
 #import <UIKit/UIKit.h>
 #import "LegendDataSource.h"
 
-@interface LegendViewController : UIViewController {
+@interface LegendViewController : UIViewController <UIViewControllerRestoration> {
 	UITableView* _legendTableView;
 	LegendDataSource* _legendDataSource;
 	UIPopoverController* _popOverController;

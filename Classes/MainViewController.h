@@ -79,6 +79,8 @@
 // name of the map to load
 @property (strong,nonatomic) NSString * mapName;
 @property (strong, nonatomic) Map * ersMap;
+@property(weak,nonatomic) IBOutlet UILabel *currentMapLabel; // this is the sublayer
+@property (strong, nonatomic) NSString *sublayerName;
 
 // location
 @property (strong,nonatomic) CLLocationManager *locationManager;

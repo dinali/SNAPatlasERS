@@ -118,10 +118,9 @@
     NSArray *allTitlesArray = self.aMap.getTitles;
     
     mainVC.mapName = [allTitlesArray objectAtIndex:row];
-
-    //NSString *nameOfmap = mainVC.mapName;
     
     mainVC.ersMapServiceURL = [self.aMap getMapService:mainVC.mapName];
+    NSLog(@"map url = %@", mainVC.ersMapServiceURL);
     
     // but we don't need the navigation controller anymore because MainViewController already has the navigation bar at the top
     [self presentViewController:mainVC animated:YES completion:nil];

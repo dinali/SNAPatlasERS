@@ -35,7 +35,7 @@
 //tableview to display the layers.
 @property (nonatomic, strong) IBOutlet UITableView *tableView;
 
-//@property (nonatomic,strong) ResultsViewController *resultsViewController;
+@property (strong, nonatomic) NSString *checkedLayer;
 
 //adds the layer to the array of layer views to be displayed in the Table of Contents.
 //This is called when the layer is loaded.
@@ -124,7 +124,7 @@
     //get the layer info represented by the cell
     LayerInfo *layerInfo = [[self.mapViewLevelLayerInfo flattenElementsWithCacheRefresh:NO withLegend:YES] objectAtIndex:(cellIndexPath.row)];
     
-    NSLog(@"layerName %@", layerInfo.layerName);
+    NSLog(@"TOC layerName %@", layerInfo.layerName);
     
     //set the visibility of the layer info. 
     [layerInfo setVisible:visibility];
@@ -134,7 +134,7 @@
 #pragma mark -
 #pragma mark Helper Methods
 
-// DESCRIPTION: this is where the layer is actually inserted into the TOC; also see ProcessMapLayers
+// DESCRIPTION: this is where the layer is actually inserted into the TOC; also see ProcessMapLayers; adds the title to the TOC
 - (void)insertLayer:(AGSLayer*)layer atIndex:(int)index
 {
     //creates the layer info node for a layer in the map after it is loaded in the map view. and the delegate method is called after the tree is constructed. 
@@ -142,21 +142,21 @@
     
     // delete the Search, States, and Base maps so they don't appear in the Table of Contents - doesn't make a difference here
     
-    NSLog(@"layerInfo name %@ =", layerInfo.layerName);
+    NSString *string = layerInfo.layerName;
+    NSString *trimmedString = [string stringByTrimmingCharactersInSet:
+                               [NSCharacterSet whitespaceCharacterSet]];
     
     // leave this in case you decide to add one of these back in the TOC
-     /*if (!([layerInfo.layerName isEqualToString: @"Search Layer ="]) ||
-         !([layerInfo.layerName isEqualToString: @"States ="]) ||
-         !([layerInfo.layerName isEqualToString: @"Base Map ="]))
-      */
-    if ([layerInfo.layerName isEqualToString: @"Snap Benefits"])
+     if (([trimmedString isEqualToString: @"Search Layer"]) ||
+         ([trimmedString isEqualToString: @"States"]) ||
+         ([trimmedString isEqualToString: @"Base Map"]))
+     {
+         // don't do anything - exclude them
+     }
+    else
      {
          [self.mapViewLevelLayerInfo insertChild:layerInfo atIndex:0];
-        //[self.mapViewLevelLayerInfo insertChild:layerInfo atIndex:index];
-    }
-    else{
-        NSLog(@"found one of the bad layers");
-    }
+     }
 }
 
 - (void)doneButtonPressed {
@@ -164,7 +164,13 @@
 		[self.popOverController dismissPopoverAnimated:YES];
 	else
      */
-		[self dismissModalViewControllerAnimated:YES];
+    MainViewController *mainVC = [[MainViewController alloc] initWithNibName:@"MainViewController" bundle:nil];
+    mainVC.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
+    
+    mainVC.sublayerName = self.checkedLayer;
+    [self presentViewController:mainVC animated:YES completion:nil];
+    
+    //[self dismissModalViewControllerAnimated:YES];
     
 }
 
@@ -209,6 +215,8 @@
       
         //assign the title.
         layerInfoCell.valueLabel.text = layerInfo.layerName;
+        
+        NSLog(@"layer name = %@", layerInfo.layerName);
         
         //assign the delegate to call the method when the visibility is changed. 
         layerInfoCell.layerInfoCellDelegate = self;
@@ -256,6 +264,9 @@
     LayerInfo *layerInfo = (LayerInfo *)tempObject;    
 	layerInfo.inclusive = !layerInfo.inclusive;	
 	[self.mapViewLevelLayerInfo flattenElementsWithCacheRefresh:YES withLegend:YES];
+    
+    NSLog(@"checked layer name = %@", layerInfo.layerName);
+    self.checkedLayer = layerInfo.layerName; // pass this to MainViewController label
     
     //reload the table. 
 	[tableView reloadData];

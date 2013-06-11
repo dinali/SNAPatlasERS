@@ -22,7 +22,14 @@
 
 - (void)applicationDidFinishLaunching:(UIApplication *)application {
     
-    // Override point for customization after app launch    
+    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    // Override point for customization after application launch.
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
+        self.viewController = [[MainViewController alloc] initWithNibName:@"MainViewController" bundle:nil];
+    } else {
+        self.viewController = [[MainViewController alloc] initWithNibName:@"MainViewController_iPad" bundle:nil];
+    }
+    
     [window setRootViewController:viewController];
     [window makeKeyAndVisible];
 }

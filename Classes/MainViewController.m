@@ -40,9 +40,11 @@
 @synthesize findMeButton = _findMeButton;
 @synthesize ersMapServiceURL = _ersMapServiceURL;
 @synthesize ersMap = _ersMap;
+@synthesize currentMapLabel = _currentMapLabel;
+@synthesize sublayerName = _sublayerName;
 
 #define kTiledLayerURL @"http://gis2.ers.usda.gov/ArcGIS/rest/services/Background_Cache/MapServer"
-//#define kDynamicMapServiceURL @"http://gis2.ers.usda.gov/ArcGIS/rest/services/snap_Benefits/MapServer"
+
 #define kMapServiceURL @"http://gis2.ers.usda.gov/ArcGIS/rest/services/Reference2/MapServer" // states
 
 - (id)init
@@ -71,7 +73,8 @@
 // occurs After viewDidLoad
 - (void) viewWillAppear:(BOOL)animated {
        
-    NSLog(@"viewWillAppear called");
+    //NSLog(@"viewWillAppear called");
+    self.currentMapLabel.text = self.sublayerName;  // set by TOCViewControler!
 }
 
 - (IBAction)showCurrentLocation:(id)sender
@@ -89,13 +92,10 @@
     [self setRestorationIdentifier:@"mainVC"];
     self.restorationClass = [self class];
     
-    NSLog(@"map to show = %@", _mapName);
-    
     // CHECK internet connection
     BOOL wifiBoolean = [self checkForInternet];
     
     if(wifiBoolean == YES){
-        NSLog(@"main viewDidLoad:accessed ERS map service");
         
         // MAP IS LOADING
         
@@ -103,14 +103,13 @@
         [self.activityIndicator startAnimating];
         
         // MAP IS LOADING:this hard codes the length of time to display the indicator, that's not such a good approach because the network time might vary; this is the only place it works to call the displayIndicator
-        [self performSelector:@selector(stopIndicator)withObject:nil afterDelay:15.0]; // 10 seconds
+        [self performSelector:@selector(stopIndicator)withObject:nil afterDelay:15.0]; // 15 seconds
         
         // LOAD LAYERS
-        
         //create the toc view controller, toc view controller changes visibility of the mapView without calling this viewDidLoad method
         self.tocViewController = [[TOCViewController alloc] initWithMapView:self.mapView];
         
-        // Calls method that adds the layer to the legend each time layer is loaded
+        // LEGEND: calls method that adds the layer to the legend each time layer is loaded
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(respondToLayerLoaded:) name:AGSLayerDidLoadNotification object:nil];
         
         NSURL *mapUrl = [NSURL URLWithString:kTiledLayerURL];
@@ -121,6 +120,8 @@
         
         if(self.mapName.length == 0){
             self.ersMapServiceURL = [NSURL URLWithString:@"http://gis2.ers.usda.gov/ArcGIS/rest/services/snap_Benefits/MapServer"];
+            self.mapName = @"Benefits";
+            NSLog(@"map URL = %@", self.ersMapServiceURL);
         }
         else{
             NSLog(@"map URL = %@", self.ersMapServiceURL); // use the value passed from MapPickerVC
@@ -141,9 +142,14 @@
             layer.opacity = .8;
         }
         
-    NSLog(@"before adding Snap layer");
-        [self.mapView addMapLayer:layer withName:@"Snap Benefits"];
-    NSLog(@"after adding Snap layer");
+        // this is the title of the layer in the TOC - mapName must match definition in Map class! changed dynamically
+        
+        if(self.mapName.length !=0){
+             [self.mapView addMapLayer:layer withName:self.mapName];
+        }
+        else{
+            [self.mapView addMapLayer:layer withName:@"Benefits"];
+        }
         
         NSURL *stateMapUrl = [NSURL URLWithString:kMapServiceURL];
         AGSDynamicMapServiceLayer *dynamicLyr = [AGSDynamicMapServiceLayer dynamicMapServiceLayerWithURL:stateMapUrl];
@@ -164,8 +170,8 @@
         self.mapView.callout.delegate = self;
         
         // TODO: this might not be necessary
-        //create the graphics layer that the geocoding result
-        //will be stored in and add it to the map
+        // create the graphics layer that the geocoding result
+        // will be stored in and add it to the map
         self.graphicsLayer = [AGSGraphicsLayer graphicsLayer];
         [self.mapView addMapLayer:self.graphicsLayer withName:@"Search Layer"];
         
@@ -174,20 +180,19 @@
         
         // LEGEND: a data source that will hold the legend items
         self.legendDataSource = [[LegendDataSource alloc] init];
-        
-        //Initialize the legend view controller
-        //This will be displayed when user clicks on the info button
-        
         self.legendViewController = [[LegendViewController alloc] initWithNibName:@"LegendViewController" bundle:nil];
-        self.legendViewController.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
-        
+        self.legendViewController.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
         self.legendViewController.legendDataSource = self.legendDataSource;
         
         // ADDED FOR POPUP BY LOCATION
         self.mapView.touchDelegate = self;
         
         //create identify task
-        self.identifyTask = [AGSIdentifyTask identifyTaskWithURL:[NSURL URLWithString:self.mapName ]];
+        self.identifyTask = [AGSIdentifyTask identifyTaskWithURL:self.ersMapServiceURL];
+        
+       // self.identifyTask = [AGSIdentifyTask identifyTaskWithURL:[NSURL URLWithString:self.mapName ]];
+        
+        //NSLog(@"mapName passed to identifyTask = %@", self.mapName);
         self.identifyTask.delegate = self;
         
         //create identify parameters
@@ -198,12 +203,11 @@
         
         // CCLocationManager
         /* not used, can be used to find distance between points */
-        self.locationManager = [[CLLocationManager alloc]init];
-        self.locationManager.desiredAccuracy = kCLLocationAccuracyBest;
-        self.locationManager.delegate = self;
-        [self.locationManager startUpdatingLocation];
-        self.startLocation = nil;
-        
+//        self.locationManager = [[CLLocationManager alloc]init];
+//        self.locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+//        self.locationManager.delegate = self;
+//        [self.locationManager startUpdatingLocation];
+//        self.startLocation = nil;
     }
     else{
         NSLog(@"main viewDidLoad:no wifi available");
@@ -236,58 +240,6 @@
 	return internet;
 }
 
-//-(NSURL*) getDefaultMapURL{
-//    
-//    if(_mapName.length == 0){
-//        self.ersMapServiceURL = @"http://gis2.ers.usda.gov/ArcGIS/rest/services/snap_Benefits/MapServer";
-//    }
-//    return self.ersMapServiceURL;
-//}
-
-
-/* NOT USED */
--(void)reachabilityChanged:(NSNotification*)note
-{
-    Reachability * reachStatus = [note object];
-    
-    if([reachStatus isReachable])
-    {
-        _notificationLabel.text = @"ERS map service is available";
-    }
-    else
-    {
-        _notificationLabel.text = @"ERS map service is not available";
-    }
-}
-
-// NOT CURRENTLY USED
--(BOOL) checkConnectionStatus:(NSNotification*)note {
-    
-    BOOL connectBoolean;
-    
-    NetworkStatus internetStatus = [reach currentReachabilityStatus];
-    
-    switch (internetStatus) {
-        case NotReachable:
-            NSLog(@"check Status: the internet is down.");
-            connectBoolean = NO;
-            break;
-            
-        case ReachableViaWiFi:
-        {
-            NSLog(@"The internet is working via WIFI.");
-            connectBoolean = YES;
-            break;
-        }
-        case ReachableViaWWAN:
-        {
-            NSLog(@"The internet is working via WWAN.");
-            connectBoolean = YES;
-            break;
-        }
-    }
-    return connectBoolean;
-}
 
 #pragma mark -
 #pragma mark Map is Loading:UIActivityIndicatorView
@@ -352,15 +304,17 @@
 }
 
 #pragma mark -
-#pragma mark AGSCalloutDelegate -- DISPLAYS THE box with related information for the location
+#pragma mark  -- LOCATION CALLOUT: displays the box with related information for the location; AGSCalloutDelegate
 
 - (void) didClickAccessoryButtonForCallout:(AGSCallout *) callout
 {
     AGSGraphic* graphic = (AGSGraphic*) callout.representedObject;
-    //The user clicked the callout button, so display the complete set of results
+    
     ResultsViewController *resultsVC = [[ResultsViewController alloc] initWithNibName:@"ResultsViewController" bundle:nil];
     
-    // this is the set to Exclude from the display in the popup
+    resultsVC.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
+    
+    // this is the set to Exclude from the popup
        
     NSMutableDictionary * tempDictionary = [graphic allAttributes].mutableCopy;
     [tempDictionary removeObjectForKey:@"OBJECTID"];
@@ -368,10 +322,9 @@
     [tempDictionary removeObjectForKey:@"Shape_Area"];
     [tempDictionary removeObjectForKey:@"Shape_Length"];
     
-    //set our attributes/results into the results VC
+    // set our attributes/results into the results VC
     resultsVC.results = tempDictionary;
     
-    //display the results vc modally
     [self presentModalViewController:resultsVC animated:YES];
 }
 
@@ -473,12 +426,13 @@
 
 #pragma mark - Show location data in popup:AGSCalloutDelegate methods
 
+// SHOWSTOPPER: graphicsDict is null
 - (void)mapView:(AGSMapView *)mapView didClickAtPoint:(CGPoint)screen mapPoint:(AGSPoint *)mappoint graphics:(NSDictionary *)graphicsDict {
     
     //store for later use
     self.mappoint = mappoint;
     
-	//the layer we want is layer ‘5’ (from the map service doc)
+    // TODO: why is this hard coded to 1???
 	self.identifyParams.layerIds = [NSArray arrayWithObjects:[NSNumber numberWithInt:1], nil];
 	self.identifyParams.tolerance = 3;
 	self.identifyParams.geometry = self.mappoint;
@@ -517,10 +471,11 @@
                 [self.graphicsLayer addGraphic:result.feature];
                 _graphic = result.feature;
                 title = result.layerName;
+                
                 layerID = result.layerId; // can this be a filter? not used
             }
             
-            self.mapView.callout.title = title; // this is just the title
+            self.mapView.callout.title = title; 
             self.mapView.callout.detail = @"Click for details";
             
             // Show callout for graphic
@@ -562,16 +517,17 @@
 #pragma mark - UI:BarButton items
 
 /* display the WebViewController that shows
- * the overview etc.
+ * the overview etc., there's only one URL for all the SNAP maps
 */
 
 - (IBAction)showWebDetails:(id)sender {
     WebsiteViewController *webVC = [[WebsiteViewController alloc] initWithNibName:@"WebsiteViewController" bundle:nil];
+    webVC.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
     
     Map * myMap = [[Map alloc]init];
     
     /* pass the URL depending on which map is being displayed */
-    webVC.pageURL = [myMap getURL:@"SNAP"];
+    webVC.pageURL = [myMap getURL:@"Benefits"];
     
     [self presentViewController:webVC animated:YES completion:nil];
 }
@@ -588,6 +544,8 @@
     
     PickerNavigationController *pickerNC = [[PickerNavigationController alloc]initWithRootViewController:pickerViewController];
     
+    pickerViewController.modalTransitionStyle =UIModalTransitionStyleCrossDissolve;
+    
     [self presentViewController:pickerNC animated:YES completion:nil];
 }
 
@@ -596,6 +554,7 @@
 +(UIViewController*)viewControllerWithRestorationIdentifierPath:(NSArray *)identifierComponents coder:(NSCoder *)coder{
     
     UIViewController * mainViewController = [[MainViewController alloc]initWithNibName:@"MainViewController" bundle:nil];
+    
     return mainViewController;
 }
 
@@ -633,6 +592,52 @@
         NSLog(@"didReceiveMemoryWarning in MainVC");
     }
 }
+
+/* NOT USED */
+//-(void)reachabilityChanged:(NSNotification*)note
+//{
+//    Reachability * reachStatus = [note object];
+//
+//    if([reachStatus isReachable])
+//    {
+//        _notificationLabel.text = @"ERS map service is available";
+//    }
+//    else
+//    {
+//        _notificationLabel.text = @"ERS map service is not available";
+//    }
+//}
+
+// NOT CURRENTLY USED
+//-(BOOL) checkConnectionStatus:(NSNotification*)note {
+//
+//    BOOL connectBoolean;
+//
+//    NetworkStatus internetStatus = [reach currentReachabilityStatus];
+//
+//    switch (internetStatus) {
+//        case NotReachable:
+//            NSLog(@"check Status: the internet is down.");
+//            connectBoolean = NO;
+//            break;
+//
+//        case ReachableViaWiFi:
+//        {
+//            NSLog(@"The internet is working via WIFI.");
+//            connectBoolean = YES;
+//            break;
+//        }
+//        case ReachableViaWWAN:
+//        {
+//            NSLog(@"The internet is working via WWAN.");
+//            connectBoolean = YES;
+//            break;
+//        }
+//    }
+//    return connectBoolean;
+//}
+
+
 
 
 @end

@@ -31,8 +31,7 @@
 // if we add the other Atlases, add the related URLS here
 -(NSURL*) getURL:mapName{
     
-    if([mapName isEqual: @"SNAP"])
-    {
+    if([mapName isEqual: @"Benefits"]){
         NSString *siteString = @"http://www.ers.usda.gov/data-products/supplemental-nutrition-assistance-program-(snap)-data-system.aspx";
         self.pageURL = [NSURL URLWithString:siteString];
     }
@@ -43,7 +42,7 @@
 -(NSURL*) getMapService:mapName{
     
     NSString *siteString = nil;
-    if([mapName isEqual: @"SNAP"])
+    if([mapName isEqual: @"Benefits"])
     {
         siteString = @"http://gis2.ers.usda.gov/ArcGIS/rest/services/snap_Benefits/MapServer";
     }

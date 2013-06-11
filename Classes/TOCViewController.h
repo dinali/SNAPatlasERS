@@ -15,6 +15,7 @@
 
 #import <UIKit/UIKit.h>
 #import <ArcGIS/ArcGIS.h>
+#import "MainViewController.h"
 
 @interface TOCViewController : UIViewController <UIViewControllerRestoration>
 

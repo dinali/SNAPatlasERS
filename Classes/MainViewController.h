@@ -26,6 +26,7 @@
 #import "MapPickerViewController.h"
 #import "PickerNavigationController.h"
 #import "Map.h"
+#import "TOCViewController.h"
 
 @interface MainViewController : UIViewController <AGSMapViewLayerDelegate, AGSLocatorDelegate, AGSCalloutDelegate, AGSMapViewTouchDelegate, AGSIdentifyTaskDelegate, UIViewControllerRestoration, CLLocationManagerDelegate> {
     
@@ -42,6 +43,7 @@
     UIButton* _changeMapButton;
     
 	LegendDataSource* _legendDataSource;
+    LegendInfo* _legendInfo;
 	LegendViewController* _legendViewController;
     
     //Only used with iPad - obsolete
@@ -61,6 +63,7 @@
 
 // show legend
 @property (nonatomic, strong) LegendDataSource *legendDataSource;
+@property (nonatomic, strong) LegendInfo *legendInfo;
 @property (nonatomic, strong) LegendViewController *legendViewController;
 
 // location popup
@@ -80,7 +83,7 @@
 @property (strong,nonatomic) NSString * mapName;
 @property (strong, nonatomic) Map * ersMap;
 @property(weak,nonatomic) IBOutlet UILabel *currentMapLabel; // this is the sublayer
-@property (strong, nonatomic) NSString *sublayerName;
+@property (strong, nonatomic) NSString *layerName;
 
 // location
 @property (strong,nonatomic) CLLocationManager *locationManager;

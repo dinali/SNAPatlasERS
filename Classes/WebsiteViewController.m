@@ -33,7 +33,7 @@
     [self setRestorationIdentifier:@"websiteVC"];
     self.restorationClass = [self class];
     
-    NSURL *url = _pageURL;
+    NSURL *url = self.pageURL;
     NSURLRequest *request = [NSURLRequest requestWithURL:url];
     
     [_webView loadRequest:request];

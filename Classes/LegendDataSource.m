@@ -22,8 +22,28 @@
 		//Initialize member variables.
 		//legendInfos will hold objects containing information for each legend item
 		self.legendInfos = [[NSMutableArray alloc] init];
+        
+        [[NSNotificationCenter defaultCenter]
+         addObserver:self
+         selector:@selector(handleNotification:)
+         name:@"changedLayerNotification"
+         object:nil];
     }
     return self;
+}
+
+/* NEW CODE */
+
+// pass layerName
+-(void)handleNotification:(NSNotification *)pNotification
+{
+    self.layerName = (NSString*)[pNotification object];
+    
+    if ([self.layerName isEqual: nil]){
+        self.layerName = @"2010 total SNAP benefits";
+    }
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (void) addLegendForLayer:(AGSLayer *)layer{
@@ -38,7 +58,7 @@
 			msi.delegate = self;
 			[msi retrieveLegendInfo];
 		}else {
-			NSLog(@"Skipping layer [%@]. ArcGIS Service must be version 10 SP1 or above",msi.URL );
+			// NSLog(@"Skipping layer [%@]. ArcGIS Service must be version 10 SP1 or above",msi.URL );
 		}
 
 		
@@ -52,7 +72,7 @@
 			[msi retrieveLegendInfo];
 
 		} else {
-			NSLog(@"Skipping layer [%@]. ArcGIS Service must be version 10 SP1 or above",msi.URL);
+			// NSLog(@"Skipping layer [%@]. ArcGIS Service must be version 10 SP1 or above",msi.URL);
 		}
 	
 	}else if ([layer isKindOfClass: [AGSFeatureLayer class]]) {
@@ -89,7 +109,7 @@
 	}else {
 		//skip other layer types
 		//legend not supported
-		NSLog(@"Skipping layer of type %@. Legend not supported.",[layer class]);
+		//NSLog(@"Skipping layer of type %@. Legend not supported.",[layer class]);
 	}
 }
 
@@ -98,6 +118,7 @@
 - (void)mapServiceInfo:(AGSMapServiceInfo *)mapServiceInfo operationDidRetrieveLegendInfo:(NSOperation*)op {
     
         NSArray* layerInfos = mapServiceInfo.layerInfos;
+       // LegendInfo* legend = [[LegendInfo alloc]init];
         
         //Loop through all sub-layers
         for (int i=0; i<[layerInfos count]; i++) {
@@ -106,23 +127,27 @@
             
                //  NSLog(@"name = %@", layerInfo.name);
                //  NSLog(@"layerID = %u", layerInfo.layerId);
+           
+               //  NSLog(@"LEGEND DATA SOURCE:legend.sublayerName = %@", legend.sublayerName);
             
-            // somehow have to pass an identifier for the layer that you want to display
-            if([layerInfo.name isEqual: @"2010 total SNAP benefits"]){
+            // pass an identifier for the layer that you want to display
+            if(self.layerName.length == 0){
+                self.layerName = (@"2010 total SNAP benefits");
+            }
+            
+            if([layerInfo.name isEqual: self.layerName]){
                 NSArray* legendLabels = layerInfo.legendLabels;
                 NSArray* legendImages = layerInfo.legendImages;
                 
-                // HAVE to extract just the layer being displayed...
+                // HAVE to extract just the sublayer being displayed...
                 LegendInfo* legendInfo = [[LegendInfo alloc] init];
                 legendInfo.name = @"1,000 dollars";
                 [self.legendInfos addObject:legendInfo];
                 
                 for(int j=0;j<[legendImages count];j++){
-                    //for(int j=0;j< 1;j++){
+                    
                     //Store info for each legend item
                     LegendInfo* legendInfo = [[LegendInfo alloc] init];
-                    
-                    //legendInfo.name = layerInfo.name;
                     
                     legendInfo.detail = [legendLabels objectAtIndex:j];
                     legendInfo.image = [legendImages objectAtIndex:j];
@@ -132,29 +157,6 @@
         }
         //Reload the table to display newly added legend items
         [self reload];
-    
-    /*
-	NSArray* layerInfos = mapServiceInfo.layerInfos;
-	//Loop through all sub-layers
-	for (int i=0; i<[layerInfos count]; i++) {
-		
-		AGSMapServiceLayerInfo* layerInfo = (AGSMapServiceLayerInfo*)[layerInfos objectAtIndex:i];
-		NSArray* legendLabels = layerInfo.legendLabels;
-		NSArray* legendImages = layerInfo.legendImages;
-		
-		for(int j=0;j<[legendImages count];j++){
-			//Store info for each legend item
-			LegendInfo* legendInfo = [[LegendInfo alloc] init];
-			legendInfo.name = layerInfo.name;
-			legendInfo.detail = [legendLabels objectAtIndex:j];
-			legendInfo.image = [legendImages objectAtIndex:j];
-			[self.legendInfos addObject:legendInfo];
-		}
-		
-	}
-	//Reload the table to display newly added legend items
-	[self reload];
-     */
 }
 
 - (void)mapServiceInfo:(AGSMapServiceInfo *)mapServiceInfo operation:(NSOperation*)op didFailToRetrieveLegendInfoWithError:(NSError*)error{

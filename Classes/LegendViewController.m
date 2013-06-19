@@ -17,12 +17,16 @@
 @synthesize legendDataSource = _legendDataSource;
 @synthesize popOverController=_popOverController;
 
+@synthesize legendInfo = _legendInfo; // TODO: dead end?
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self setRestorationIdentifier:@"legendVC"];
     self.restorationClass = [self class];
 	//Hook up the table view with the data source to display legend
 	self.legendTableView.dataSource = self.legendDataSource;
+    
+   // NSLog(@"LEGEND VC sublayername = %@", self.legendInfo.sublayerName); // tried to populate this from MainVC, does it work?
 }
 
 - (IBAction) dismiss {

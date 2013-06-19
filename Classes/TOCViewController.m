@@ -14,11 +14,6 @@
 #import "LayerInfo.h"
 #import "LayerInfoCell.h"
 #import "LayerLegendCell.h"
-//#import "MainViewController.h" // is this a circular reference?
-
-// see if the popup can be passed the new layer?
-//#import "ResultsViewController.h"
-
 
 @interface TOCViewController() <LayerInfoCellDelegate, UITableViewDelegate, UITableViewDataSource>
 
@@ -164,14 +159,37 @@
 		[self.popOverController dismissPopoverAnimated:YES];
 	else
      */
-    MainViewController *mainVC = [[MainViewController alloc] initWithNibName:@"MainViewController" bundle:nil];
-    mainVC.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
     
-    mainVC.sublayerName = self.checkedLayer;
-    [self presentViewController:mainVC animated:YES completion:nil];
+    /* NEW CODE */
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:@"changedLayerNotification"
+     object:self.checkedLayer];
     
-    //[self dismissModalViewControllerAnimated:YES];
+    /* THIS IS THE PROBLEM */
+    // using this code displays the legend dynamically, but the map view won't change
     
+//        MainViewController *mainVC = [[MainViewController alloc] initWithNibName:@"MainViewController" bundle:nil];
+//        mainVC.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
+//    
+//        mainVC.sublayerName = self.checkedLayer;
+//        [self presentViewController:mainVC animated:YES completion:nil];
+    
+    /* TEST CRASHALYTICS */
+    
+    //    @try{
+    //        NSString *aString = @"a string";
+    //        NSString *bString = @"b string";
+    //
+    //        NSArray *myArray = [NSArray arrayWithObjects:aString, bString, nil];
+    //
+    //        NSString *exceptionString = [myArray objectAtIndex:5]; // exception!
+    //
+    //    }
+    //    @catch (NSException *ex) {
+    //        NSLog(@"exception = %@", ex);
+    //    }
+    
+    [self dismissModalViewControllerAnimated:YES];
 }
 
 
@@ -216,7 +234,7 @@
         //assign the title.
         layerInfoCell.valueLabel.text = layerInfo.layerName;
         
-        NSLog(@"layer name = %@", layerInfo.layerName);
+     //   NSLog(@"layer name = %@", layerInfo.layerName);
         
         //assign the delegate to call the method when the visibility is changed. 
         layerInfoCell.layerInfoCellDelegate = self;
@@ -265,7 +283,7 @@
 	layerInfo.inclusive = !layerInfo.inclusive;	
 	[self.mapViewLevelLayerInfo flattenElementsWithCacheRefresh:YES withLegend:YES];
     
-    NSLog(@"checked layer name = %@", layerInfo.layerName);
+    //NSLog(@"checked layer name = %@", layerInfo.layerName);
     self.checkedLayer = layerInfo.layerName; // pass this to MainViewController label
     
     //reload the table. 

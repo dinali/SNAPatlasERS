@@ -36,7 +36,12 @@
 		969A770516FCB15B00851F40 /* ArcGIS.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 969A770416FCB15B00851F40 /* ArcGIS.bundle */; };
 		969C0C0A1734427000FC6E79 /* index-cards.png in Resources */ = {isa = PBXBuildFile; fileRef = 969C0C091734427000FC6E79 /* index-cards.png */; };
 		969C0C0C173442BF00FC6E79 /* map.png in Resources */ = {isa = PBXBuildFile; fileRef = 969C0C0B173442BF00FC6E79 /* map.png */; };
-		96A3753A175CCF87006370D5 /* MainStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 96A37539175CCF87006370D5 /* MainStoryboard.storyboard */; };
+		96A531221771E44600BFC547 /* Default-icon-iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = 96A5311E1771E44600BFC547 /* Default-icon-iphone.png */; };
+		96A531231771E44600BFC547 /* Default-iPhone.png in Resources */ = {isa = PBXBuildFile; fileRef = 96A5311F1771E44600BFC547 /* Default-iPhone.png */; };
+		96A531241771E44600BFC547 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 96A531201771E44600BFC547 /* Default.png */; };
+		96A531251771E44600BFC547 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 96A531211771E44600BFC547 /* Default@2x.png */; };
+		96A531271771E45300BFC547 /* Default_icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 96A531261771E45300BFC547 /* Default_icon.png */; };
+		96A5314F1772491900BFC547 /* MainWindow-iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 96A5314E1772491900BFC547 /* MainWindow-iPad.xib */; };
 		96F43948175E2E830059CB05 /* MapPickerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 96F43946175E2E830059CB05 /* MapPickerViewController.m */; };
 		96F43949175E2E830059CB05 /* MapPickerViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 96F43947175E2E830059CB05 /* MapPickerViewController.xib */; };
 		96F4394E175E367D0059CB05 /* SNAPbenefits2010.png in Resources */ = {isa = PBXBuildFile; fileRef = 96F4394A175E367D0059CB05 /* SNAPbenefits2010.png */; };
@@ -101,7 +106,12 @@
 		969A770416FCB15B00851F40 /* ArcGIS.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = ArcGIS.bundle; sourceTree = "<group>"; };
 		969C0C091734427000FC6E79 /* index-cards.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "index-cards.png"; sourceTree = "<group>"; };
 		969C0C0B173442BF00FC6E79 /* map.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = map.png; sourceTree = "<group>"; };
-		96A37539175CCF87006370D5 /* MainStoryboard.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = MainStoryboard.storyboard; sourceTree = "<group>"; };
+		96A5311E1771E44600BFC547 /* Default-icon-iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-icon-iphone.png"; sourceTree = "<group>"; };
+		96A5311F1771E44600BFC547 /* Default-iPhone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-iPhone.png"; sourceTree = "<group>"; };
+		96A531201771E44600BFC547 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
+		96A531211771E44600BFC547 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
+		96A531261771E45300BFC547 /* Default_icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default_icon.png; sourceTree = "<group>"; };
+		96A5314E1772491900BFC547 /* MainWindow-iPad.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = "MainWindow-iPad.xib"; path = "iPad/MainWindow-iPad.xib"; sourceTree = "<group>"; };
 		96F43945175E2E830059CB05 /* MapPickerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MapPickerViewController.h; sourceTree = "<group>"; };
 		96F43946175E2E830059CB05 /* MapPickerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MapPickerViewController.m; sourceTree = "<group>"; };
 		96F43947175E2E830059CB05 /* MapPickerViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MapPickerViewController.xib; path = Classes/MapPickerViewController.xib; sourceTree = "<group>"; };
@@ -190,6 +200,7 @@
 				080E96DDFE201D6D7F000001 /* TOC */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
+				96A5314D1772491700BFC547 /* iPad */,
 				AF6FBC8A12550E5300F476B4 /* Resources-iPad */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
@@ -215,7 +226,6 @@
 				96F43957175E7D690059CB05 /* PickerNavigationController.xib */,
 				96F43947175E2E830059CB05 /* MapPickerViewController.xib */,
 				965D94D3175D24FB0008A59E /* WebsiteViewController.xib */,
-				96A37539175CCF87006370D5 /* MainStoryboard.storyboard */,
 				9694F243174D10510078EB14 /* LegendViewController.xib */,
 				C56B409114C78B6C003A46EB /* TOCViewController.xib */,
 				9698FD21173BDADD00CA5895 /* PopUpResultsViewController.xib */,
@@ -250,6 +260,11 @@
 		969A55F1173AD63B001D0BC2 /* graphics */ = {
 			isa = PBXGroup;
 			children = (
+				96A531261771E45300BFC547 /* Default_icon.png */,
+				96A5311E1771E44600BFC547 /* Default-icon-iphone.png */,
+				96A5311F1771E44600BFC547 /* Default-iPhone.png */,
+				96A531201771E44600BFC547 /* Default.png */,
+				96A531211771E44600BFC547 /* Default@2x.png */,
 				96F4394A175E367D0059CB05 /* SNAPbenefits2010.png */,
 				96F4394B175E367D0059CB05 /* SNAPparticipation2010.png */,
 				96F4394C175E367D0059CB05 /* SNAPperperson2010.png */,
@@ -267,6 +282,14 @@
 				97B8C41916786197003B6E1B /* Default-568h@2x.png */,
 			);
 			name = graphics;
+			sourceTree = "<group>";
+		};
+		96A5314D1772491700BFC547 /* iPad */ = {
+			isa = PBXGroup;
+			children = (
+				96A5314E1772491900BFC547 /* MainWindow-iPad.xib */,
+			);
+			name = iPad;
 			sourceTree = "<group>";
 		};
 		AF6FBC8A12550E5300F476B4 /* Resources-iPad */ = {
@@ -387,7 +410,6 @@
 				9694F242174D10240078EB14 /* ResultsViewController.xib in Resources */,
 				9694F244174D10510078EB14 /* LegendViewController.xib in Resources */,
 				9694F24A174D4B980078EB14 /* location_icon.jpg in Resources */,
-				96A3753A175CCF87006370D5 /* MainStoryboard.storyboard in Resources */,
 				965D94D5175D24FB0008A59E /* WebsiteViewController.xib in Resources */,
 				96F43949175E2E830059CB05 /* MapPickerViewController.xib in Resources */,
 				96F4394E175E367D0059CB05 /* SNAPbenefits2010.png in Resources */,
@@ -396,6 +418,12 @@
 				96F43951175E367D0059CB05 /* SocioeconomicChildPoverty2010.png in Resources */,
 				96F43959175E7D690059CB05 /* PickerNavigationController.xib in Resources */,
 				9675951717665A9200C22CD2 /* MainViewController_iPad.xib in Resources */,
+				96A531221771E44600BFC547 /* Default-icon-iphone.png in Resources */,
+				96A531231771E44600BFC547 /* Default-iPhone.png in Resources */,
+				96A531241771E44600BFC547 /* Default.png in Resources */,
+				96A531251771E44600BFC547 /* Default@2x.png in Resources */,
+				96A531271771E45300BFC547 /* Default_icon.png in Resources */,
+				96A5314F1772491900BFC547 /* MainWindow-iPad.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -442,7 +470,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = TableOfContentsSample_Prefix.pch;
 				INFOPLIST_FILE = "TableOfContentsSample-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-all_load",
@@ -453,7 +481,7 @@
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				VALID_ARCHS = armv7;
 			};
 			name = Debug;
@@ -471,7 +499,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = TableOfContentsSample_Prefix.pch;
 				INFOPLIST_FILE = "TableOfContentsSample-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-all_load",
@@ -482,7 +510,7 @@
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				VALID_ARCHS = armv7;
 			};
 			name = Release;

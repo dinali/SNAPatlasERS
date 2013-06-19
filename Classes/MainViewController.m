@@ -10,7 +10,6 @@
 // See the use restrictions at http://help.arcgis.com/en/sdk/10.0/usageRestrictions.htm
 //
 #import "MainViewController.h"
-#import "TOCViewController.h"
 
 @interface MainViewController()
 {
@@ -41,47 +40,68 @@
 @synthesize ersMapServiceURL = _ersMapServiceURL;
 @synthesize ersMap = _ersMap;
 @synthesize currentMapLabel = _currentMapLabel;
-@synthesize sublayerName = _sublayerName;
+@synthesize layerName = _layerName;
+@synthesize legendInfo = _legendInfo;
 
 #define kTiledLayerURL @"http://gis2.ers.usda.gov/ArcGIS/rest/services/Background_Cache/MapServer"
-
 #define kMapServiceURL @"http://gis2.ers.usda.gov/ArcGIS/rest/services/Reference2/MapServer" // states
 
-- (id)init
-{
+- (id)init {
     self = [super init];
-    //if (self == nil) {
-        _mapName = @"http://gis2.ers.usda.gov/ArcGIS/rest/services/snap_Benefits/MapServer";
-    //}
-    NSLog(@"init mapName = %@", _mapName);
+    if (self) {
+        
+    }
     return self;
 }
 
-// receive mapName passed from other VC?
+/* NEW CODE */
+
+// pass layerName
+-(void)handleNotification:(NSNotification *)pNotification
+{
+    self.layerName = (NSString*)[pNotification object];
+        
+    if ([self.layerName isEqual: nil]){
+        self.layerName = @"2010 total SNAP benefits";
+    }
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+// DON'T DELETE THIS, the iPad version will thrown an exception
 -(id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
-    self = [super initWithNibName:@"MainViewController" bundle:[NSBundle mainBundle]];
+   self = [super initWithNibName:@"MainViewController" bundle:[NSBundle mainBundle]];
     
     if(self){
         //_mapName = @"http://gis2.ers.usda.gov/ArcGIS/rest/services/snap_Benefits/MapServer";
         //  ersMapServiceURL =
     }
-    NSLog(@"initWithNibName _ersMapServiceURLe = %@", _ersMapServiceURL);
     return self;
 }
 
-// occurs After viewDidLoad
+// display the map name or the layer name
 - (void) viewWillAppear:(BOOL)animated {
-       
-    //NSLog(@"viewWillAppear called");
-    self.currentMapLabel.text = self.sublayerName;  // set by TOCViewControler!
+    
+    if(self.layerName.length == 0){
+        self.currentMapLabel.text = self.mapName;
+    }
+    else{
+        self.currentMapLabel.text = self.layerName;  // set by TOCViewControler!
+    }
+    
+    [[NSNotificationCenter defaultCenter]
+     addObserver:self
+     selector:@selector(handleNotification:)
+     name:@"changedLayerNotification"
+     object:nil];
 }
 
 - (IBAction)showCurrentLocation:(id)sender
 {
     [self.mapView centerAtPoint:[self.mapView.locationDisplay mapLocation] animated:YES];
     self.mapView.locationDisplay.autoPanMode = AGSLocationDisplayAutoPanModeDefault;
-    NSLog(@"showCurrentLocation");
+   // NSLog(@"showCurrentLocation");
 }
 
 - (void)viewDidLoad {
@@ -121,7 +141,7 @@
         if(self.mapName.length == 0){
             self.ersMapServiceURL = [NSURL URLWithString:@"http://gis2.ers.usda.gov/ArcGIS/rest/services/snap_Benefits/MapServer"];
             self.mapName = @"Benefits";
-            NSLog(@"map URL = %@", self.ersMapServiceURL);
+           // NSLog(@"map URL = %@", self.ersMapServiceURL);
         }
         else{
             NSLog(@"map URL = %@", self.ersMapServiceURL); // use the value passed from MapPickerVC
@@ -176,7 +196,9 @@
         [self.mapView addMapLayer:self.graphicsLayer withName:@"Search Layer"];
         
         // CURRENT LOCATION marker: user's current location as starting point
-        [self.mapView.locationDisplay startDataSource];
+      //  [self.mapView.locationDisplay startDataSource];
+        [self.mapView centerAtPoint:[self.mapView.locationDisplay mapLocation] animated:YES];
+        self.mapView.locationDisplay.autoPanMode = AGSLocationDisplayAutoPanModeDefault;
         
         // LEGEND: a data source that will hold the legend items
         self.legendDataSource = [[LegendDataSource alloc] init];
@@ -281,7 +303,8 @@
 		[self presentModalViewController:self.tocViewController animated:YES];
 	}
     */
-    [self presentModalViewController:self.tocViewController animated:YES];
+    [self presentViewController:self.tocViewController animated:YES completion:nil];
+    
 }
 
 // OBSOLETE because the legend is visible in the Layers
@@ -300,7 +323,8 @@
 		[self presentModalViewController:self.legendViewController animated:YES];
 	}
     */
-    [self presentModalViewController:self.legendViewController animated:YES];
+    [self presentViewController:self.legendViewController animated:YES completion:nil];
+    
 }
 
 #pragma mark -
@@ -325,7 +349,7 @@
     // set our attributes/results into the results VC
     resultsVC.results = tempDictionary;
     
-    [self presentModalViewController:resultsVC animated:YES];
+    [self presentViewController:resultsVC animated:YES completion:nil];
 }
 
 
@@ -426,7 +450,6 @@
 
 #pragma mark - Show location data in popup:AGSCalloutDelegate methods
 
-// SHOWSTOPPER: graphicsDict is null
 - (void)mapView:(AGSMapView *)mapView didClickAtPoint:(CGPoint)screen mapPoint:(AGSPoint *)mappoint graphics:(NSDictionary *)graphicsDict {
     
     //store for later use
@@ -461,8 +484,7 @@
         symbol.color = [UIColor colorWithRed:0 green:0 blue:1 alpha:0.5];
         
         NSString *title = nil;
-        NSUInteger layerID = 0;
-        
+                
         @try {
             
             // for each result, set the symbol and add it to the graphics layer
@@ -470,9 +492,8 @@
                 result.feature.symbol = symbol;
                 [self.graphicsLayer addGraphic:result.feature];
                 _graphic = result.feature;
-                title = result.layerName;
-                
-                layerID = result.layerId; // can this be a filter? not used
+            ///    title = result.layerName;
+                title = self.layerName;
             }
             
             self.mapView.callout.title = title; 
@@ -485,7 +506,7 @@
             NSLog(@"Exception: %@", e);
         }
         @finally {
-            NSLog(@"finally");
+            //NSLog(@"finally");
         }
     }
 }
@@ -551,6 +572,18 @@
 
 #pragma mark - cleanup and startup
 
+// destroy the legend data source so that when the user selects a different layer, the legend items only appear once
+-(void)viewDidDisappear:(BOOL)animated{
+    
+    if(![self.legendDataSource isEqual:nil]){
+        self.legendDataSource = nil;
+    }
+    
+    // this approach releases memory, but the ViewController would have to be re-built
+    //[self.mapView removeFromSuperview];
+    //self.mapView = nil;
+}
+
 +(UIViewController*)viewControllerWithRestorationIdentifierPath:(NSArray *)identifierComponents coder:(NSCoder *)coder{
     
     UIViewController * mainViewController = [[MainViewController alloc]initWithNibName:@"MainViewController" bundle:nil];
@@ -576,8 +609,9 @@
         self.locationManager = nil;
         self.startLocation = nil;
     
-        if([[AGSDevice currentDevice] isIPad])
-        self.popOverController = nil;
+        if([[AGSDevice currentDevice] isIPad]){
+            self.popOverController = nil;
+        }
         [self setFindMeButton:nil];
     
         self.graphicsLayer = nil;

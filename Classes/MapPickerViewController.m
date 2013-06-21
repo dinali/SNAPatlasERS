@@ -60,8 +60,8 @@
 - (void)goBack:(id)sender {
     
     MainViewController *mainVC = [[MainViewController alloc]initWithNibName:@"MainViewController" bundle:nil];
-    
-    [self presentViewController:mainVC animated:YES completion:nil];
+    [self.navigationController pushViewController:mainVC animated:YES];
+   // [self presentViewController:mainVC animated:YES completion:nil];
 }
 
 
@@ -74,6 +74,8 @@
          imagesArray = nil;
          webURL = nil;
      }
+    
+    NSLog(@"MapPicker, didReceiveMemoryWarning");
 }
 
 #pragma mark - Table view data source
@@ -120,10 +122,11 @@
     mainVC.mapName = [allTitlesArray objectAtIndex:row];
     
     mainVC.ersMapServiceURL = [self.aMap getMapService:mainVC.mapName];
-    NSLog(@"map url = %@", mainVC.ersMapServiceURL);
+   // NSLog(@"map url = %@", mainVC.ersMapServiceURL);
     
-    // but we don't need the navigation controller anymore because MainViewController already has the navigation bar at the top
-    [self presentViewController:mainVC animated:YES completion:nil];
+   [self.navigationController pushViewController:mainVC animated:YES];
+   // doesn't work because new selected map is not shown [self.navigationController popViewControllerAnimated:YES];
+   // [self presentViewController:mainVC animated:YES completion:nil];
 }
 
 #pragma mark - setup

@@ -24,11 +24,11 @@
 #import "WebsiteViewController.h"
 #import "ResultsViewController.h"
 #import "MapPickerViewController.h"
-#import "PickerNavigationController.h"
+//#import "PickerNavigationController.h"
 #import "Map.h"
 #import "TOCViewController.h"
 
-@interface MainViewController : UIViewController <AGSMapViewLayerDelegate, AGSLocatorDelegate, AGSCalloutDelegate, AGSMapViewTouchDelegate, AGSIdentifyTaskDelegate, UIViewControllerRestoration, CLLocationManagerDelegate> {
+@interface MainViewController : UIViewController <AGSMapViewLayerDelegate, AGSLocatorDelegate, AGSCalloutDelegate, AGSMapViewTouchDelegate, AGSIdentifyTaskDelegate, UIViewControllerRestoration, CLLocationManagerDelegate > {
     
 	AGSMapView *_mapView;
 	UIButton* _infoButton;
@@ -46,7 +46,7 @@
     LegendInfo* _legendInfo;
 	LegendViewController* _legendViewController;
     
-    //Only used with iPad - obsolete
+    //Only used with iPad - obsolete??
 	UIPopoverController* _popOverController;
 }
 
@@ -55,7 +55,7 @@
 @property (nonatomic, strong) UIPopoverController *popOverController;
 @property (weak, nonatomic) IBOutlet AGSMapView *legendButton;
 
-// find address feature
+// find address feature & call-out popup?
 //@property (nonatomic, strong) IBOutlet UISearchBar *searchBar;
 @property (nonatomic, strong) AGSGraphicsLayer *graphicsLayer;
 @property (nonatomic, strong) AGSLocator *locator;

@@ -134,7 +134,6 @@
 		97B8C41916786197003B6E1B /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		97E8186A1304CDDF001E3C72 /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon.png; sourceTree = "<group>"; };
 		97E8186B1304CDDF001E3C72 /* icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon@2x.png"; sourceTree = "<group>"; };
-		C56B408714C777B6003A46EB /* libstdc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.dylib"; path = "usr/lib/libstdc++.dylib"; sourceTree = SDKROOT; };
 		C56B408F14C78B6C003A46EB /* TOCViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TOCViewController.h; sourceTree = "<group>"; };
 		C56B409014C78B6C003A46EB /* TOCViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TOCViewController.m; sourceTree = "<group>"; };
 		C56B409114C78B6C003A46EB /* TOCViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = TOCViewController.xib; path = Classes/TOCViewController.xib; sourceTree = "<group>"; };
@@ -243,7 +242,6 @@
 				97B8C41716786182003B6E1B /* OpenGLES.framework */,
 				97B8C4151678617C003B6E1B /* libc++.dylib */,
 				9702E53B1446526400A46CA5 /* libz.dylib */,
-				C56B408714C777B6003A46EB /* libstdc++.dylib */,
 				9702E5421446527000A46CA5 /* Security.framework */,
 				9792DFAE13B2662500C41657 /* MobileCoreServices.framework */,
 				9792DFAB13B2661F00C41657 /* MediaPlayer.framework */,

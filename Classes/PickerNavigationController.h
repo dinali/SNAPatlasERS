@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "MapPickerViewController.h"
+#import "MainViewController.h"
 
 @interface PickerNavigationController : UINavigationController <UIViewControllerRestoration>
 

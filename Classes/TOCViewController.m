@@ -171,8 +171,9 @@
 //        MainViewController *mainVC = [[MainViewController alloc] initWithNibName:@"MainViewController" bundle:nil];
 //        mainVC.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
 //    
-//        mainVC.sublayerName = self.checkedLayer;
-//        [self presentViewController:mainVC animated:YES completion:nil];
+//        mainVC.layerName = self.checkedLayer;
+//        //[self presentViewController:mainVC animated:YES completion:nil];
+//        [self.navigationController pushViewController:mainVC animated:YES];
     
     /* TEST CRASHALYTICS */
     
@@ -189,7 +190,8 @@
     //        NSLog(@"exception = %@", ex);
     //    }
     
-    [self dismissModalViewControllerAnimated:YES];
+    
+     [self dismissViewControllerAnimated:NO completion:nil];
 }
 
 

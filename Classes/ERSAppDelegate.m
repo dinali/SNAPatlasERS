@@ -18,8 +18,9 @@
 
 @synthesize window;
 @synthesize viewController;
+//@synthesize pickerNavigationController;
 
-
+/*
 - (void)applicationDidFinishLaunching:(UIApplication *)application {
     
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
@@ -33,14 +34,26 @@
     [window setRootViewController:viewController];
     [window makeKeyAndVisible];
 }
+*/
 
-/*
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    // Override point for customization after application launch.
+   self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    
+    viewController = [[MainViewController alloc] initWithNibName:@"MainViewController" bundle:nil];
+    
+    // set mainvc as the root
+    UINavigationController *navController = [[UINavigationController alloc]initWithRootViewController:viewController];
+    
+    [[self window] setRootViewController:navController];
+    
+    self.window.backgroundColor = [UIColor whiteColor];
+    
+    //[window setRootViewController:viewController];
+    [window makeKeyAndVisible];
     return YES;
 }
- */
+ 
 
 -(BOOL)application:(UIApplication *)application shouldRestoreApplicationState:(NSCoder *)coder
 {
@@ -52,5 +65,13 @@
     return YES;
 }
 
+#pragma mark -
+#pragma mark Memory management
+
+- (void)applicationDidReceiveMemoryWarning:(UIApplication *)application {
+    /*
+     Free up as much memory as possible by purging cached data objects that can be recreated (or reloaded from disk) later.
+     */
+}
 
 @end

@@ -28,6 +28,7 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath ;
 
 @property (nonatomic, strong) NSMutableArray* legendInfos;
+@property (nonatomic, strong) NSString *layerName;
 
 @end
 
@@ -36,10 +37,12 @@
     NSString *_name;
     UIImage *_image;
 	NSString *_detail;
+    NSString *sublayerName;
 }
 
-@property (nonatomic,strong) NSString *name;
+@property (nonatomic,strong) NSString *name; // root name, e.g., Benefits
 @property (nonatomic,strong) NSString *detail;
 @property (readwrite,strong) UIImage *image;
+@property (nonatomic,strong) NSString *sublayerName; // lower level name - leaf node, 2010 total SNAP benefits
 
 @end

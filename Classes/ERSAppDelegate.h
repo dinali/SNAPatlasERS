@@ -13,13 +13,16 @@
 #import <UIKit/UIKit.h>
 
 @class MainViewController;
+//@class PickerNavigationController;
 
 @interface ERSAppDelegate : NSObject <UIApplicationDelegate> {
     UIWindow *window;
     MainViewController *viewController;
+   // PickerNavigationController *pickerNavigationController;
 }
 
 @property (nonatomic, strong) IBOutlet UIWindow *window;
+//@property (nonatomic,strong) IBOutlet PickerNavigationController *pickerNavigationController;
 @property (nonatomic, strong) IBOutlet MainViewController *viewController;
 
 @end

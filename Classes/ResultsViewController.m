@@ -25,7 +25,7 @@
 
 - (IBAction)done:(id)sender
 {
-    [self dismissModalViewControllerAnimated:YES];
+    [self dismissViewControllerAnimated:NO completion:nil];
 }
 
 #pragma mark -
@@ -104,6 +104,12 @@
          self.results = nil;
          self.tableView = nil;
      }
+}
+
+// does this do anything?
+-(void)viewWillDisappear:(BOOL)animated{
+    [self.view removeFromSuperview];
+    self.view = nil;
 }
 
 @end

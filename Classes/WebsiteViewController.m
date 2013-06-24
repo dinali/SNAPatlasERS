@@ -33,10 +33,10 @@
     [self setRestorationIdentifier:@"websiteVC"];
     self.restorationClass = [self class];
     
-    NSURL *url = _pageURL;
+    NSURL *url = self.pageURL;
     NSURLRequest *request = [NSURLRequest requestWithURL:url];
     
-    [_webView loadRequest:request];
+    [self.webView loadRequest:request];
 }
 
 
@@ -44,7 +44,8 @@
     
     MainViewController *mainVC = [[MainViewController alloc]initWithNibName:@"MainViewController" bundle:nil];
     
-    [self presentViewController:mainVC animated:YES completion:nil];
+    [self.navigationController pushViewController:mainVC animated:YES];
+    //[self presentViewController:mainVC animated:YES completion:nil];
 }
 
 #pragma mark - cleanup and startup

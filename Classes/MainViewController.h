@@ -91,6 +91,8 @@
 
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *findMeButton;
 
+@property (weak, nonatomic) IBOutlet UIToolbar *detailsButon;
+
 @property (strong,nonatomic) NSURL *ersMapServiceURL;
 
 /****** METHODS ******/

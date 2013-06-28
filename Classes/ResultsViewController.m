@@ -23,9 +23,9 @@
     self.restorationClass = [self class];
 }
 
-- (IBAction)done:(id)sender
+- (void)done:(id)sender
 {
-    [self dismissViewControllerAnimated:NO completion:nil];
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 #pragma mark -

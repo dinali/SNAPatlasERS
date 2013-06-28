@@ -157,9 +157,6 @@
         //create the toc view controller, toc view controller changes visibility of the mapView without calling this viewDidLoad method
         self.tocViewController = [[TOCViewController alloc] initWithMapView:self.mapView];
         
-        // LEGEND: calls method that adds the layer to the legend each time layer is loaded
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(respondToLayerLoaded:) name:AGSLayerDidLoadNotification object:nil];
-        
         NSURL *mapUrl = [NSURL URLWithString:kTiledLayerURL];
         AGSTiledMapServiceLayer *tiledLyr = [AGSTiledMapServiceLayer tiledMapServiceLayerWithURL:mapUrl];
         [self.mapView addMapLayer:tiledLyr withName:@"Base Map"];
@@ -203,8 +200,10 @@
             // only show the Xth layer
             layer.visibleLayers= [NSArray arrayWithObjects:[NSNumber numberWithInt:0], nil];
             layer.opacity = .8;
+            
+            // LEGEND: calls method that adds the layer to the legend each time layer is loaded
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(respondToLayerLoaded:) name:AGSLayerDidLoadNotification object:nil];
         }
-        
         
        /* STATES */
         
@@ -222,8 +221,6 @@
                                         spatialReference:sr];
         //[self.mapView zoomToEnvelope:env animated:YES];
         
-     
-        
         // ADDED FOR GEOCODING FIND ADDRESS, also need for popup location!
         
         //set the delegate on the mapView so we get notifications for user interaction with the callout for geocoding
@@ -236,8 +233,8 @@
         // TODO: needed for the callout
         // create the graphics layer that the geocoding result
         // will be stored in and add it to the map
-        self.graphicsLayer = [AGSGraphicsLayer graphicsLayer];
-        [self.mapView addMapLayer:self.graphicsLayer withName:@"Search Layer"];
+       // self.graphicsLayer = [AGSGraphicsLayer graphicsLayer];
+       // [self.mapView addMapLayer:self.graphicsLayer withName:@"Search Layer"];
         
         // GPS enabled
         
@@ -755,6 +752,7 @@
         self.mappoint = nil;
         self.graphic = nil;
     
+        self.view = nil;
         NSLog(@"didReceiveMemoryWarning in MainVC");
     }
 }

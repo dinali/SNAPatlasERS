@@ -53,31 +53,18 @@
     
     self.title = @"Choose a map";    
     self.navigationItem.leftBarButtonItem = self.backButton;
-    
 }
 
 
 - (void)goBack:(id)sender {
+     [self.navigationController popViewControllerAnimated:YES];
     
-    MainViewController *mainVC = [[MainViewController alloc]initWithNibName:@"MainViewController" bundle:nil];
-    [self.navigationController pushViewController:mainVC animated:YES];
-   // [self presentViewController:mainVC animated:YES completion:nil];
+//    MainViewController *mainVC = [[MainViewController alloc]initWithNibName:@"MainViewController" bundle:nil];
+//    [self.navigationController pushViewController:mainVC animated:YES];
+//   // [self presentViewController:mainVC animated:YES completion:nil];
 }
 
 
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-     if(self.view!=nil){
-         self.aMap = nil;
-         tableDataArray = nil;
-         imagesArray = nil;
-         webURL = nil;
-         self.view = nil;
-     }
-    
-    NSLog(@"MapPicker, didReceiveMemoryWarning");
-}
 
 #pragma mark - Table view data source
 
@@ -110,27 +97,55 @@
 
 
 #pragma mark - Table view delegate
-
+// pass the info back to MainVC to create the new layer given these parameters
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
- 
-    MainViewController *mainVC = [[MainViewController alloc] initWithNibName:@"MainViewController" bundle:nil];
-    
     NSInteger row = [[self tableView].indexPathForSelectedRow row];
     
     NSArray *allTitlesArray = self.aMap.getTitles;
     
-    mainVC.mapName = [allTitlesArray objectAtIndex:row];
+    NSString *newMapName = [allTitlesArray objectAtIndex:row];
+    NSURL *newURL = [self.aMap getMapService:newMapName];
     
-    mainVC.ersMapServiceURL = [self.aMap getMapService:mainVC.mapName];
+    /* NEW CODE */
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:@"changedMapNotification"
+     object:newURL];
+    
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:@"lookWhoCalledNotification"
+     object:@"MapPicker"];
+    
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:@"handleNameNotification"
+     object:newMapName];
+    
+    [self.navigationController popViewControllerAnimated:YES];
+   // mainVC.ersMapServiceURL = [self.aMap getMapService:mainVC.mapName];
    // NSLog(@"map url = %@", mainVC.ersMapServiceURL);
     
-   [self.navigationController pushViewController:mainVC animated:YES];
-   // doesn't work because new selected map is not shown [self.navigationController popViewControllerAnimated:YES];
+   //[self.navigationController pushViewController:mainVC animated:YES];
+   // doesn't work because new selected map is not shown
+    // pop the MapPicker but somehow re-set the map on MVC
    // [self presentViewController:mainVC animated:YES completion:nil];
+    
 }
 
-#pragma mark - setup
+#pragma mark - setup & cleanup
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    if(self.view!=nil){
+        self.aMap = nil;
+        tableDataArray = nil;
+        imagesArray = nil;
+        webURL = nil;
+        self.view = nil;
+    }
+    
+    NSLog(@"MapPicker, didReceiveMemoryWarning");
+}
+
 
 +(UIViewController*)viewControllerWithRestorationIdentifierPath:(NSArray *)identifierComponents coder:(NSCoder *)coder{
     

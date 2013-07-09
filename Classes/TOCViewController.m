@@ -54,38 +54,43 @@
 @synthesize tableView = _tableView;
 
 // access the mapview that was created in MainViewController and passed here in ViewDidLoad()
+- (id)init {
+    self = [super init];
+    if (self) {
+        //create the map level layer info object with id of -2 and layer view as nil.
+        self.mapViewLevelLayerInfo = [[LayerInfo alloc] initWithLayer:nil layerID:-2 name:@"Map" target:nil];
+        
+        // pass the mapView to TOCVC?
+        [[NSNotificationCenter defaultCenter]addObserver:self
+                                                selector:@selector(getMapViewNotification:)name:@"passMapViewNotification" object:nil];
+    }
+    return self;
+}
+
+// obsolete?
 - (id)initWithMapView:(AGSMapView *)mapView
 {
     self = [super initWithNibName:@"TOCViewController" bundle:nil];
     if (self) {
+      //  self.mapView = mapView;
         
-        //assign the mapView
-        self.mapView = mapView;
+        //display list of sublayers 
+      //  [self processMapLayers];
         
-        //process the map layers. 
-        [self processMapLayers];
-        
-        //create the map level layer info object with id of -2 and layer view as nil.       
+        //create the map level layer info object with id of -2 and layer view as nil.
         self.mapViewLevelLayerInfo = [[LayerInfo alloc] initWithLayer:nil layerID:-2 name:@"Map" target:nil];
     }
     return self;
 }
 
-- (void)didReceiveMemoryWarning
-{
-    // Releases the view if it doesn't have a superview.
-    [super didReceiveMemoryWarning];
+// pass the new mapView to TOCVC
+-(void)getMapViewNotification:(NSNotification *) mNotification{
+    self.mapView = (AGSMapView *)[mNotification object];
+    NSLog(@"number of layers = %d", self.mapView.mapLayers.count);
+    
 }
 
-#pragma mark - View lifecycle
-
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
-    [self setRestorationIdentifier:@"tocVC"];
-    self.restorationClass = [self class];
-}
-
+// when the user clicks the Icon
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
@@ -93,20 +98,10 @@
     [self processMapLayers];
 }
 
-
-- (void)viewDidUnload
-{
-    [super viewDidUnload];
-    // Release any retained subviews of the main view.
-    // e.g. self.myOutlet = nil;
+// ????
+-(void)viewWillDisappear:(BOOL)animated{
+  //  self.mapView = nil;
 }
-
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-    // Return YES for supported orientations
-    return (interfaceOrientation == UIInterfaceOrientationPortrait);
-}
-
 
 #pragma mark -
 #pragma mark LayerInfoCellDelegate
@@ -121,9 +116,13 @@
     
     NSLog(@"TOC layerName %@", layerInfo.layerName);
     
-    //set the visibility of the layer info. 
     [layerInfo setVisible:visibility];
-                                                                        
+    
+    // pass the name of the checked sublayer to MainVC
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:@"handleLayerNotification"
+     object:layerInfo.layerName];
+                                                                    
 }
 
 #pragma mark -
@@ -138,6 +137,9 @@
     // delete the Search, States, and Base maps so they don't appear in the Table of Contents - doesn't make a difference here
     
     NSString *string = layerInfo.layerName;
+    
+    NSLog(@"layerName = %@", string);
+    
     NSString *trimmedString = [string stringByTrimmingCharactersInSet:
                                [NSCharacterSet whitespaceCharacterSet]];
     
@@ -155,15 +157,15 @@
 }
 
 - (void)doneButtonPressed {
-    /*if([[AGSDevice currentDevice] isIPad])
-		[self.popOverController dismissPopoverAnimated:YES];
-	else
-     */
     
-    /* NEW CODE */
+    // map Name for MainVC title
     [[NSNotificationCenter defaultCenter]
-     postNotificationName:@"changedLayerNotification"
+     postNotificationName:@"handleNameNotification"
      object:self.checkedLayer];
+    
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:@"lookWhoCalledNotification"
+     object:@"TOC"];
     
     /* THIS IS THE PROBLEM */
     // using this code displays the legend dynamically, but the map view won't change
@@ -175,23 +177,8 @@
 //        //[self presentViewController:mainVC animated:YES completion:nil];
 //        [self.navigationController pushViewController:mainVC animated:YES];
     
-    /* TEST CRASHALYTICS */
-    
-    //    @try{
-    //        NSString *aString = @"a string";
-    //        NSString *bString = @"b string";
-    //
-    //        NSArray *myArray = [NSArray arrayWithObjects:aString, bString, nil];
-    //
-    //        NSString *exceptionString = [myArray objectAtIndex:5]; // exception!
-    //
-    //    }
-    //    @catch (NSException *ex) {
-    //        NSLog(@"exception = %@", ex);
-    //    }
-    
-    
-     [self dismissViewControllerAnimated:YES completion:nil];
+   // self.mapView = nil;
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 
@@ -236,7 +223,7 @@
         //assign the title.
         layerInfoCell.valueLabel.text = layerInfo.layerName;
         
-     //   NSLog(@"layer name = %@", layerInfo.layerName);
+        NSLog(@"layer name = %@", layerInfo.layerName);
         
         //assign the delegate to call the method when the visibility is changed. 
         layerInfoCell.layerInfoCellDelegate = self;
@@ -264,7 +251,6 @@
         
         return layerLegendCell;
     } 
-    
 }
 
 
@@ -332,7 +318,6 @@
         [self.mapViewLevelLayerInfo removeChildWithLayerName:layerInfo.layerName];
     }
 
-    
     //adds the layers to the tree ( (starting from top most layer, going to bottom)
     for (int i = 0, j=self.mapView.mapLayers.count-1; i < self.mapView.mapLayers.count ; i++,j--)
     {     
@@ -382,6 +367,37 @@
     
     //reload the table view.
     [self.tableView reloadData];
+}
+
+- (void)didReceiveMemoryWarning
+{
+    // Releases the view if it doesn't have a superview.
+    [super didReceiveMemoryWarning];
+}
+
+#pragma mark - View lifecycle
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    
+   
+    
+    [self setRestorationIdentifier:@"tocVC"];
+    self.restorationClass = [self class];
+}
+
+- (void)viewDidUnload
+{
+    [super viewDidUnload];
+    // Release any retained subviews of the main view.
+    // e.g. self.myOutlet = nil;
+}
+
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+{
+    // Return YES for supported orientations
+    return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
 +(UIViewController*)viewControllerWithRestorationIdentifierPath:(NSArray *)identifierComponents coder:(NSCoder *)coder{

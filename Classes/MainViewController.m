@@ -42,6 +42,7 @@
 @synthesize currentMapLabel = _currentMapLabel;
 @synthesize layerName = _layerName;
 @synthesize legendInfo = _legendInfo;
+@synthesize whoCalled = _whoCalled; // name of the viewcontroller triggering viewWillAppear; passed by NotificationCenter
 
 #define kTiledLayerURL @"http://gis2.ers.usda.gov/ArcGIS/rest/services/Background_Cache/MapServer"
 #define kSnapRetailURL @"http://www.snapretailerlocator.com/ArcGIS/rest/services/retailer/MapServer" //SNAP retail locator
@@ -55,10 +56,15 @@
     return self;
 }
 
-/* NEW CODE */
+// gets the new URL
+-(void)handleMapNotification:(NSNotification *)mapNotifictation{
+    
+    self.ersMapServiceURL = (NSURL*)[mapNotifictation object];
+   // [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
 
 // pass layerName
--(void)handleNotification:(NSNotification *)pNotification
+-(void)updateLayerNotification:(NSNotification *)pNotification
 {
     self.layerName = (NSString*)[pNotification object];
         
@@ -66,8 +72,26 @@
         self.layerName = @"2010 total SNAP benefits";
     }
     
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+   //[[NSNotificationCenter defaultCenter] removeObserver:self];
 }
+
+// get the new map name
+-(void)updateNameNotification:(NSNotification *)nameNotification
+{
+    self.mapName = (NSString*)[nameNotification object];
+    if([self.mapName isEqual:nil]){
+        self.mapName = @"Benefits";
+    }
+}
+
+// triggered when the TOCVC calls viewWillAppear
+-(void)whoCalledNotification:(NSNotification *) whoNotification{
+    
+    self.whoCalled = (NSString*)[whoNotification object];
+    NSLog(@"who called = %@", self.whoCalled);
+}
+
+
 
 // DON'T DELETE THIS, the iPad version will thrown an exception
 -(id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -75,44 +99,93 @@
    self = [super initWithNibName:@"MainViewController" bundle:[NSBundle mainBundle]];
     
     if(self){
-        //_mapName = @"http://gis2.ers.usda.gov/ArcGIS/rest/services/snap_Benefits/MapServer";
-        //  ersMapServiceURL =
+        self.whoCalled = @"MainVC";
     }
     return self;
 }
 
 // display the map name or the layer name
+/*You should use the viewWillAppear method in MainViewController to reset the map and add new layers to reflect the map that the user picked. If many of the layers are common between the maps, you don't need to reset the map, you can individually remove & add layers.
+ */
 - (void) viewWillAppear:(BOOL)animated {
+    
+    [super viewWillAppear:animated];
+    
+    NSLog(@"new map URL = %@", self.ersMapServiceURL); // use the value passed from MapPickerVC using the notification center
+    
+    NSLog(@"number of maps at top = %d", self.mapView.mapLayers.count);
+
+    NSError *error = nil;
+    
+    if(self.ersMapServiceURL == nil){
+        // set the default here
+        self.ersMapServiceURL = [NSURL URLWithString:@"http://gis2.ers.usda.gov/ArcGIS/rest/services/snap_Benefits/MapServer"];
+        self.mapName = @"Benefits";
+    }
+    
+    // don't reload if we're here because the user fiddled with the TOC layers
+    if([self.whoCalled isEqualToString:@"TOC"]){
+        NSLog(@"TOC called me");
+    }
+    
+    // remove the topmost, leave the 2 base maps
+    // viewDidLoad = 3 layers - delete additional layers from changing maps
+    if([self.whoCalled isEqualToString:@"MapPicker"] || [self.whoCalled isEqualToString:@"MainVC"]){
+        
+        AGSLayer *removeLayer;
+        NSArray *oldLayersArray = self.mapView.mapLayers;
+        
+        if (self.mapView.mapLayers.count > 3){
+                    for(int j=0;j < 2;j++){
+                        removeLayer = [oldLayersArray objectAtIndex:(j + 2)];
+                        [self.mapView removeMapLayer:removeLayer];
+                    }
+        }
+    
+// it should pick up the new URL from the NotificationCenter to create the new map from the URL
+    AGSMapServiceInfo *info = [AGSMapServiceInfo mapServiceInfoWithURL:self.ersMapServiceURL error:&error];
+    AGSDynamicMapServiceLayer* layer = [AGSDynamicMapServiceLayer dynamicMapServiceLayerWithMapServiceInfo: info];
+        
+    [self.mapView addMapLayer:layer];  // this is a map with multiple layers included. 
+    
+    if(self.mapName.length !=0){
+        [self.mapView addMapLayer:layer withName:self.mapName];
+    }
+    else{
+        [self.mapView addMapLayer:layer withName:@"Benefits"];
+    }
     
     if(self.layerName.length == 0){
         self.currentMapLabel.text = self.mapName;
+        NSLog(@"mapName = %@", self.mapName);
     }
     else{
-        self.currentMapLabel.text = self.layerName;  // set by TOCViewControler!
+        self.currentMapLabel.text = self.layerName;  // set by TOCViewController!?
     }
-
-    // test color
-    self.view.backgroundColor = [UIColor yellowColor];
-  
-    if([self isMovingFromParentViewController]){
-        NSLog(@"pushed: I am moving From my ParentViewController");
-        //[self.mapView removeFromSuperview];
-        //self.mapView = nil;
-    }
-    if([self isMovingToParentViewController]){
-        NSLog(@"viewWillAppear:moving TO parent");
-    }
-    else{
-        NSLog(@"viewWillAppear:unspecified");
-    }
+        
+    NSLog(@"mapName = %@", self.mapName);
+    NSLog(@"layerName = %@", self.layerName);
     
-    [[NSNotificationCenter defaultCenter]
-     addObserver:self
-     selector:@selector(handleNotification:)
-     name:@"changedLayerNotification"
-     object:nil];
+    // modify this if the TOC view controller changes selection
+    if(layer.loaded)
+    {
+        // only show the Xth layer
+        layer.visibleLayers= [NSArray arrayWithObjects:[NSNumber numberWithInt:0], nil];
+        layer.opacity = .8;
+    }
+        
+    // how to pass the new mapView back to the TOCVC so it can re-process the layers?
+        [[NSNotificationCenter defaultCenter]
+         postNotificationName:@"passMapViewNotification"
+         object:self.mapView];
+        
+       // SecondViewController *secondViewController =
+       // [self.storyboard instantiateViewControllerWithIdentifier:@"secondViewController"];
+       // [self presentModalViewController:secondViewController animated:YES];
+        
+ } // end outer if
     
-   // [super viewWillAppear];
+    NSLog(@"number of layers = %d", self.mapView.mapLayers.count);
 }
 
 - (IBAction)showCurrentLocation:(id)sender
@@ -153,57 +226,67 @@
         // MAP IS LOADING:this hard codes the length of time to display the indicator, that's not such a good approach because the network time might vary; this is the only place it works to call the displayIndicator
         [self performSelector:@selector(stopIndicator)withObject:nil afterDelay:15.0]; // 15 seconds
         
-        // LOAD LAYERS
-        //create the toc view controller, toc view controller changes visibility of the mapView without calling this viewDidLoad method
-        self.tocViewController = [[TOCViewController alloc] initWithMapView:self.mapView];
+        // map URL
+        [[NSNotificationCenter defaultCenter]
+         addObserver:self
+         selector:@selector(handleMapNotification:)
+         name:@"changedMapNotification"
+         object:nil];
         
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(respondToLayerLoaded:) name:AGSLayerDidLoadNotification object:nil];
+        
+        // layer name
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                        selector:@selector(updateLayerNotification:) name:@"handleLayerNotification" object:nil];
+        // map name
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                        selector:@selector(updateNameNotification:) name:@"handleNameNotification" object:nil];
+        
+        // which controller is calling
+        [[NSNotificationCenter defaultCenter]addObserver:self
+        selector:@selector(whoCalledNotification:)name:@"lookWhoCalledNotification" object:nil];
+        
+        // LOAD LAYERS
+    
         NSURL *mapUrl = [NSURL URLWithString:kTiledLayerURL];
         AGSTiledMapServiceLayer *tiledLyr = [AGSTiledMapServiceLayer tiledMapServiceLayerWithURL:mapUrl];
         [self.mapView addMapLayer:tiledLyr withName:@"Base Map"];
-        
-        /* TEST SNAP RETAIL LOCATOR see above for URL */
-        
-//        NSURL *retailUrl = [NSURL URLWithString:kSnapRetailURL];
-//        AGSDynamicMapServiceLayer *dynamicRetailLyr = [AGSDynamicMapServiceLayer dynamicMapServiceLayerWithURL:retailUrl];
-//        [self.mapView addMapLayer:dynamicRetailLyr withName:@"Retail Locations"];
-        
+                
         /* LOAD DYNAMIC MAP, default is Benefits */
-        
-        if(self.mapName.length == 0){
-            self.ersMapServiceURL = [NSURL URLWithString:@"http://gis2.ers.usda.gov/ArcGIS/rest/services/snap_Benefits/MapServer"];
-           // self.mapName = @"Benefits";
-           // NSLog(@"map URL = %@", self.ersMapServiceURL);
-        }
-        else{
-            NSLog(@"map URL = %@", self.ersMapServiceURL); // use the value passed from MapPickerVC
-        }
-        
-        NSError *error = nil;
-        AGSMapServiceInfo *info = [AGSMapServiceInfo mapServiceInfoWithURL:self.ersMapServiceURL error:&error];
-        
-        AGSDynamicMapServiceLayer* layer = [AGSDynamicMapServiceLayer dynamicMapServiceLayerWithMapServiceInfo: info];
+      
+       // load the default map now
+//        if(self.mapName.length == 0){
+//            self.ersMapServiceURL = [NSURL URLWithString:@"http://gis2.ers.usda.gov/ArcGIS/rest/services/snap_Benefits/MapServer"];
+//            self.mapName = @"Benefits";
+//           // NSLog(@"map URL = %@", self.ersMapServiceURL);
+//        }
+//        
+//        NSError *error = nil;
+//        AGSMapServiceInfo *info = [AGSMapServiceInfo mapServiceInfoWithURL:self.ersMapServiceURL error:&error];
+//        
+//        AGSDynamicMapServiceLayer* layer = [AGSDynamicMapServiceLayer dynamicMapServiceLayerWithMapServiceInfo: info];
         
         // specifies which layer(s) are displayed on the map - this is different from what's displayed in the legend; without this code, nothing is displayed
         
         // this is the title of the layer in the TOC - mapName must match definition in Map class! changed dynamically
         
-        if(self.mapName.length !=0){
-            [self.mapView addMapLayer:layer withName:self.mapName];
-        }
-        else{
-            [self.mapView addMapLayer:layer withName:@"Benefits"];
-        }
-        
-        // modify this if the TOC view controller changes selection
-        if(layer.loaded)
-        {
-            // only show the Xth layer
-            layer.visibleLayers= [NSArray arrayWithObjects:[NSNumber numberWithInt:0], nil];
-            layer.opacity = .8;
-            
-            // LEGEND: calls method that adds the layer to the legend each time layer is loaded
-            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(respondToLayerLoaded:) name:AGSLayerDidLoadNotification object:nil];
-        }
+//        if(self.mapName.length !=0){
+//            [self.mapView addMapLayer:layer withName:self.mapName];
+//        }
+//        else{
+//            [self.mapView addMapLayer:layer withName:@"Benefits"];
+//        }
+//        
+//        // modify this if the TOC view controller changes selection
+//        if(layer.loaded)
+//        {
+//            // only show the Xth layer
+//            layer.visibleLayers= [NSArray arrayWithObjects:[NSNumber numberWithInt:0], nil];
+//            layer.opacity = .8;
+//            
+//            // LEGEND: calls method that adds the layer to the legend each time layer is loaded -- is this in the right place?
+        //    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(respondToLayerLoaded:) name:AGSLayerDidLoadNotification object:nil];
+//        }
         
        /* STATES */
         
@@ -226,15 +309,14 @@
         //set the delegate on the mapView so we get notifications for user interaction with the callout for geocoding
         self.mapView.callout.delegate = self;
         
-        /* NEW CODE */
         // layers
         self.mapView.layerDelegate = self;
         
-        // TODO: needed for the callout
-        // create the graphics layer that the geocoding result
-        // will be stored in and add it to the map
-       // self.graphicsLayer = [AGSGraphicsLayer graphicsLayer];
-       // [self.mapView addMapLayer:self.graphicsLayer withName:@"Search Layer"];
+        //create the toc view controller, toc view controller changes visibility of the mapView without calling this viewDidLoad method
+        
+       // self.tocViewController = [[TOCViewController alloc] initWithMapView:self.mapView];
+        
+        self.tocViewController = [[TOCViewController alloc]init];
         
         // GPS enabled
         
@@ -281,7 +363,6 @@
                     self.mapView.locationDisplay.autoPanMode = AGSLocationDisplayAutoPanModeDefault;
               }
         
-        
         // LEGEND: a data source that will hold the legend items
         self.legendDataSource = [[LegendDataSource alloc] init];
         self.legendViewController = [[LegendViewController alloc] initWithNibName:@"LegendViewController" bundle:nil];
@@ -290,24 +371,16 @@
         
         // ADDED FOR POPUP BY LOCATION
         self.mapView.touchDelegate = self;
-        
+        self.mapView.showMagnifierOnTapAndHold = YES;
+        self.mapView.allowMagnifierToPanMap = YES;
+ 
+        //TODO: have to move this because the mapServiceURL will change on viewWillAppear??
         //create identify task
         self.identifyTask = [AGSIdentifyTask identifyTaskWithURL:self.ersMapServiceURL];
         self.identifyTask.delegate = self;
         
         //create identify parameters
         self.identifyParams = [[AGSIdentifyParameters alloc] init];
-        
-        self.mapView.showMagnifierOnTapAndHold = YES;
-        self.mapView.allowMagnifierToPanMap = YES;
-        
-        // CCLocationManager
-        /* not used, can be used to find distance between points */
-//        self.locationManager = [[CLLocationManager alloc]init];
-//        self.locationManager.desiredAccuracy = kCLLocationAccuracyBest;
-//        self.locationManager.delegate = self;
-//        [self.locationManager startUpdatingLocation];
-//        self.startLocation = nil;
     }
     else{
         NSLog(@"main viewDidLoad:no wifi available");
@@ -384,11 +457,12 @@
     
    //[self.navigationController pushViewController:self.tocViewController animated:YES];
     
+   // self.tocViewController = [[TOCViewController alloc]init];
    [self presentViewController:self.tocViewController animated:YES completion:nil];
     
 }
 
-// OBSOLETE because the legend is visible in the Layers
+// TODO because the legend is visible in the Layers
 - (IBAction) presentLegendViewController: (id) sender{
 	//If iPad, show legend in the PopOver, else transition to the separate view controller
 	/*if([[AGSDevice currentDevice] isIPad]){
@@ -662,54 +736,19 @@
 
 #pragma mark - cleanup and startup
 
-// ([self isDismissing] || [self isMovingFromParentViewController])
-
-//-(void)viewWillDisappear:(BOOL)animated{
-//    
-//    if([self isBeingDismissed]){
-//        NSLog(@"covered: I am being dismissed");
-//    }
-//    if([self isMovingFromParentViewController]){
-//        NSLog(@"pushed: I am moving From my ParentViewController");
-//        [self.mapView removeFromSuperview];
-//        self.mapView = nil;
-//    }
-//    if([self isMovingToParentViewController]){
-//        NSLog(@"moving TO parent");
-//    }
-//}
-
 // destroy the legend data source so that when the user selects a different layer, the legend items only appear once
 -(void)viewDidDisappear:(BOOL)animated{
     
     if(![self.legendDataSource isEqual:nil]){
         self.legendDataSource = nil;
     }
-    if([self isBeingDismissed]){
-        NSLog(@"covered: MainVC is being dismissed");
-    }
-    if([self isMovingFromParentViewController]){
-        NSLog(@"pushed: I am moving From my ParentViewController");
-        //[self.mapView removeFromSuperview];
-       // self.mapView = nil;  // THIS IS CALLED THE SECOND TIME
-    }
-    if([self isMovingToParentViewController]){
-        NSLog(@"moving TO parent from MainVC");
-    }
-    else{
-        NSLog(@"unspecified in MainVC");
-    }
-    
-    // this approach releases memory, but the ViewController would have to be re-built
-   // [self.mapView removeFromSuperview];
-   //  self.mapView = nil;
 }
 
 -(void)viewWillDisappear:(BOOL)animated {
     NSUInteger ind = [[self.navigationController viewControllers] indexOfObject:self];
     if (ind == NSNotFound) {
         // do something, we're coming off the stack.
-        NSLog(@"viewWillDisappear: coming off the stack");
+        //NSLog(@"viewWillDisappear: coming off the stack");
     }
 }
 
@@ -752,6 +791,7 @@
         self.mappoint = nil;
         self.graphic = nil;
     
+        [[NSNotificationCenter defaultCenter] removeObserver:self];
         self.view = nil;
         NSLog(@"didReceiveMemoryWarning in MainVC");
     }

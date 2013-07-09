@@ -94,6 +94,7 @@
 @property (weak, nonatomic) IBOutlet UIToolbar *detailsButon;
 
 @property (strong,nonatomic) NSURL *ersMapServiceURL;
+@property (strong,nonatomic) NSString * whoCalled;
 
 /****** METHODS ******/
 

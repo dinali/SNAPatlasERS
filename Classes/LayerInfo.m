@@ -168,8 +168,6 @@
                 
                 //no legend elements for these layers. 
                 self.legendElements = nil;   
-             
-                
             }
         }
         

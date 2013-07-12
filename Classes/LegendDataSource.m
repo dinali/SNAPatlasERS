@@ -14,7 +14,9 @@
 
 
 @implementation LegendDataSource
+
 @synthesize legendInfos=_legendInfos;
+@synthesize layerName = _layerName;
 
 - (id)init {
     self = [super init];
@@ -23,11 +25,11 @@
 		//legendInfos will hold objects containing information for each legend item
 		self.legendInfos = [[NSMutableArray alloc] init];
         
-        [[NSNotificationCenter defaultCenter]
-         addObserver:self
-         selector:@selector(handleNotification:)
-         name:@"changedLayerNotification"
-         object:nil];
+        // layer name
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(updateLayerNotification:) name:@"handleLayerNotification" object:nil];
+        
+        
     }
     return self;
 }
@@ -35,17 +37,20 @@
 /* NEW CODE */
 
 // pass layerName
--(void)handleNotification:(NSNotification *)pNotification
+-(void)updateLayerNotification:(NSNotification *)pNotification
 {
     self.layerName = (NSString*)[pNotification object];
     
-    if ([self.layerName isEqual: nil]){
-        self.layerName = @"2010 total SNAP benefits";
+    if (self.layerName.length == 0){
+        self.layerName = @"2011 total SNAP benefits";
     }
+    
+    NSLog(@"NotificationCenter layerName = %@", self.layerName);
     
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
+// THIS IS CALLED BY THE OBSERVER WHEN A LAYER IS ADDED, IT GETS THE LEGENDINFO
 - (void) addLegendForLayer:(AGSLayer *)layer{
 	//Check type of layer
 	if ([layer isKindOfClass: [AGSDynamicMapServiceLayer class]]) {
@@ -109,30 +114,29 @@
 	}else {
 		//skip other layer types
 		//legend not supported
-		//NSLog(@"Skipping layer of type %@. Legend not supported.",[layer class]);
+		NSLog(@"Skipping layer of type %@. Legend not supported.",[layer class]);
 	}
 }
 
 #pragma mark -
 #pragma mark AGSMapServiceInfoDelegate
+//TODO: maybe need to pass the mapServiceInfo using the NSNotificationCenter??
+// THIS IS RELATED TO THE ADDLEGENDFORLAYER METHOD
 - (void)mapServiceInfo:(AGSMapServiceInfo *)mapServiceInfo operationDidRetrieveLegendInfo:(NSOperation*)op {
     
         NSArray* layerInfos = mapServiceInfo.layerInfos;
-       // LegendInfo* legend = [[LegendInfo alloc]init];
         
         //Loop through all sub-layers
         for (int i=0; i<[layerInfos count]; i++) {
             
             AGSMapServiceLayerInfo* layerInfo = (AGSMapServiceLayerInfo*)[layerInfos objectAtIndex:i];
             
-               //  NSLog(@"name = %@", layerInfo.name);
-               //  NSLog(@"layerID = %u", layerInfo.layerId);
-           
-               //  NSLog(@"LEGEND DATA SOURCE:legend.sublayerName = %@", legend.sublayerName);
+              //   NSLog(@"LEGEND name = %@", layerInfo.name);
+            NSLog(@"LEGEND layerInfo.name = %@", layerInfo.name);
             
             // pass an identifier for the layer that you want to display
             if(self.layerName.length == 0){
-                self.layerName = (@"2010 total SNAP benefits");
+                self.layerName = (@"2011 total annual SNAP benefits");
             }
             
             if([layerInfo.name isEqual: self.layerName]){
@@ -157,6 +161,7 @@
         }
         //Reload the table to display newly added legend items
         [self reload];
+    
 }
 
 - (void)mapServiceInfo:(AGSMapServiceInfo *)mapServiceInfo operation:(NSOperation*)op didFailToRetrieveLegendInfoWithError:(NSError*)error{
@@ -178,11 +183,12 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
 	//Number of legend items we have
-    //NSLog(@"numberOfRows = %d", [self.legendInfos count]);
+    NSLog(@"LEGEND numberOfRows = %d", [self.legendInfos count]);
 	return [self.legendInfos count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
 	static NSString *CellIdentifier = @"Cell";
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
@@ -192,6 +198,7 @@
 	
 	// Set up the cell with the legend image, text, and detail
 	LegendInfo *legendInfo = [self.legendInfos objectAtIndex:indexPath.row];
+    
 	cell.detailTextLabel.text = legendInfo.detail;
 	cell.textLabel.font = [UIFont systemFontOfSize:12.0];
 	cell.textLabel.text = legendInfo.name;

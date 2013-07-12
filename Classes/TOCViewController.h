@@ -19,12 +19,10 @@
 
 @interface TOCViewController : UIViewController <UIViewControllerRestoration>
 
-
 @property (nonatomic, weak) UIPopoverController *popOverController;
+//mapView to create the TOC for
+@property (nonatomic, weak) AGSMapView *mapView;
 
 - (id)initWithMapView:(AGSMapView *)mapView;
-
-
-
 
 @end

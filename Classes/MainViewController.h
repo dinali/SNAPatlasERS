@@ -27,6 +27,7 @@
 //#import "PickerNavigationController.h"
 #import "Map.h"
 #import "TOCViewController.h"
+#import "LayerInfo.h"
 
 @interface MainViewController : UIViewController <AGSMapViewLayerDelegate, AGSLocatorDelegate, AGSCalloutDelegate, AGSMapViewTouchDelegate, AGSIdentifyTaskDelegate, UIViewControllerRestoration, CLLocationManagerDelegate, AGSLayerDelegate > {
     
@@ -95,6 +96,7 @@
 
 @property (strong,nonatomic) NSURL *ersMapServiceURL;
 @property (strong,nonatomic) NSString * whoCalled;
+@property (nonatomic, strong) LayerInfo *mapViewLevelLayerInfo;
 
 /****** METHODS ******/
 

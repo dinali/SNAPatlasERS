@@ -30,6 +30,10 @@
 @property (nonatomic,strong) UIPopoverController* popOverController;
 @property (nonatomic,strong) LegendInfo* legendInfo;
 
-- (IBAction) dismiss;
+//- (IBAction) dismiss;
+@property (weak, nonatomic) IBOutlet UIButton *backNowButton;
+
+- (IBAction)dismissMe:(id)sender;
+
 
 @end

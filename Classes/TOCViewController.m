@@ -18,8 +18,6 @@
 @interface TOCViewController() <LayerInfoCellDelegate, UITableViewDelegate, UITableViewDataSource>
 
 
-//mapView to create the TOC for
-@property (nonatomic, weak) AGSMapView *mapView;
 
 //this is the map level layer info object, acting as the invisible root of the entire tree. 
 @property (nonatomic, strong) LayerInfo *mapViewLevelLayerInfo;
@@ -57,12 +55,17 @@
 - (id)init {
     self = [super init];
     if (self) {
-        //create the map level layer info object with id of -2 and layer view as nil.
-        self.mapViewLevelLayerInfo = [[LayerInfo alloc] initWithLayer:nil layerID:-2 name:@"Map" target:nil];
         
-        // pass the mapView to TOCVC?
-        [[NSNotificationCenter defaultCenter]addObserver:self
-                                                selector:@selector(getMapViewNotification:)name:@"passMapViewNotification" object:nil];
+        //create the map level layer info object with id of -2 and layer view as nil.
+      //  self.mapViewLevelLayerInfo = [[LayerInfo alloc] initWithLayer:nil layerID:-2 name:@"Map" target:nil];
+        
+        // map Name for MainVC title
+        // TODO: safe to delete this? this does nothing
+       // self.checkedLayer = @"TESTING";
+        
+        [[NSNotificationCenter defaultCenter]
+         postNotificationName:@"handleNameNotification"
+         object:self.checkedLayer];
     }
     return self;
 }
@@ -75,26 +78,32 @@
       //  self.mapView = mapView;
         
         //display list of sublayers 
-      //  [self processMapLayers];
+        [self processMapLayers];
         
         //create the map level layer info object with id of -2 and layer view as nil.
         self.mapViewLevelLayerInfo = [[LayerInfo alloc] initWithLayer:nil layerID:-2 name:@"Map" target:nil];
     }
+    // map Name for MainVC title
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:@"handleNameNotification"
+     object:self.checkedLayer];
+    
     return self;
 }
 
 // pass the new mapView to TOCVC
--(void)getMapViewNotification:(NSNotification *) mNotification{
-    self.mapView = (AGSMapView *)[mNotification object];
-    NSLog(@"number of layers = %d", self.mapView.mapLayers.count);
-    
-}
+//-(void)getMapViewNotification:(NSNotification *) mNotification{
+//    self.mapView = (AGSMapView *)[mNotification object];
+//    NSLog(@"TOC new mapView number of layers = %d", self.mapView.mapLayers.count);
+//    
+//}
 
 // when the user clicks the Icon
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    
+    //create the map level layer info object with id of -2 and layer view as nil.
+    self.mapViewLevelLayerInfo = [[LayerInfo alloc] initWithLayer:nil layerID:-2 name:@"Map" target:nil];
     [self processMapLayers];
 }
 
@@ -118,6 +127,7 @@
     
     [layerInfo setVisible:visibility];
     
+    // is this redundant? also in doneButtonPressed
     // pass the name of the checked sublayer to MainVC
     [[NSNotificationCenter defaultCenter]
      postNotificationName:@"handleLayerNotification"
@@ -159,25 +169,18 @@
 - (void)doneButtonPressed {
     
     // map Name for MainVC title
-    [[NSNotificationCenter defaultCenter]
-     postNotificationName:@"handleNameNotification"
-     object:self.checkedLayer];
+   // [[NSNotificationCenter defaultCenter]
+    // postNotificationName:@"handleNameNotification"
+   //  object:self];
     
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:@"handleLayerNotification"
+     object:self.checkedLayer];  // sublayer name
+
     [[NSNotificationCenter defaultCenter]
      postNotificationName:@"lookWhoCalledNotification"
      object:@"TOC"];
     
-    /* THIS IS THE PROBLEM */
-    // using this code displays the legend dynamically, but the map view won't change
-    
-//        MainViewController *mainVC = [[MainViewController alloc] initWithNibName:@"MainViewController" bundle:nil];
-//        mainVC.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
-//    
-//        mainVC.layerName = self.checkedLayer;
-//        //[self presentViewController:mainVC animated:YES completion:nil];
-//        [self.navigationController pushViewController:mainVC animated:YES];
-    
-   // self.mapView = nil;
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
@@ -380,8 +383,6 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
-   
     
     [self setRestorationIdentifier:@"tocVC"];
     self.restorationClass = [self class];

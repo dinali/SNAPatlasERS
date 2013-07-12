@@ -19,22 +19,53 @@
 
 @synthesize legendInfo = _legendInfo; // TODO: dead end?
 
+
+
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self setRestorationIdentifier:@"legendVC"];
     self.restorationClass = [self class];
-	//Hook up the table view with the data source to display legend
-	self.legendTableView.dataSource = self.legendDataSource;
     
-   // NSLog(@"LEGEND VC sublayername = %@", self.legendInfo.sublayerName); // tried to populate this from MainVC, does it work?
+//    if (!(self.legendDataSource == nil)){
+//        NSLog(@"after datasource");
+//        //Hook up the table view with the data source to display legend
+//        self.legendTableView.dataSource = self.legendDataSource;
+//    }
 }
 
-- (IBAction) dismiss {
-	/*if([[AGSDevice currentDevice] isIPad])
-		[self.popOverController dismissPopoverAnimated:YES];
-	else */
-		[self dismissModalViewControllerAnimated:YES];
+-(void)viewWillAppear:(BOOL)animated{
+    if (!(self.legendDataSource == nil)){
+        NSLog(@"after datasource");
+        //Hook up the table view with the data source to display legend
+        self.legendTableView.dataSource = self.legendDataSource;
+    }
 }
+
+
+- (IBAction)dismissMe:(id)sender {
+    
+    self.legendDataSource = nil;
+    
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:@"lookWhoCalledNotification"
+     object:@"Legend"];
+    
+    [self.navigationController popViewControllerAnimated:YES];
+   // [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+//-(void)goBack:(id)sender; // go back button
+//{
+//	/*if([[AGSDevice currentDevice] isIPad])
+//		[self.popOverController dismissPopoverAnimated:YES];
+//	else */
+//		//[self dismissModalViewControllerAnimated:YES];
+//    
+//    self.legendDataSource = nil;
+//    [self dismissViewControllerAnimated:YES completion:nil];
+//   // [self.navigationController popViewControllerAnimated:YES];
+//}
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
     return YES;
@@ -57,4 +88,9 @@
 }
 
 
+- (void)viewDidUnload {
+   // [self setBackButton:nil];
+    [self setBackNowButton:nil];
+    [super viewDidUnload];
+}
 @end

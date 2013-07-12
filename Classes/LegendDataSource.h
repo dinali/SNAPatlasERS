@@ -22,10 +22,14 @@
 - (id) init;
 - (void) reload;
 - (void) addLegendForLayer:(AGSLayer*)layer;
+- (void) updateLayerNotification:(NSNotification *)pNotification;
 
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView ;
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section ;
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath ;
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView;
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section;
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath;
+- (void)mapServiceInfo:(AGSMapServiceInfo *)mapServiceInfo operationDidRetrieveLegendInfo:(NSOperation*)op;
+- (void)mapServiceInfo:(AGSMapServiceInfo *)mapServiceInfo operation:(NSOperation*)op didFailToRetrieveLegendInfoWithError:(NSError*)error;
+
 
 @property (nonatomic, strong) NSMutableArray* legendInfos;
 @property (nonatomic, strong) NSString *layerName;

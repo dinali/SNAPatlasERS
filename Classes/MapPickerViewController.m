@@ -58,10 +58,6 @@
 
 - (void)goBack:(id)sender {
      [self.navigationController popViewControllerAnimated:YES];
-    
-//    MainViewController *mainVC = [[MainViewController alloc]initWithNibName:@"MainViewController" bundle:nil];
-//    [self.navigationController pushViewController:mainVC animated:YES];
-//   // [self presentViewController:mainVC animated:YES completion:nil];
 }
 
 
@@ -143,7 +139,7 @@
         self.view = nil;
     }
     
-    NSLog(@"MapPicker, didReceiveMemoryWarning");
+  //  NSLog(@"MapPicker, didReceiveMemoryWarning");
 }
 
 

@@ -52,9 +52,10 @@
 }
 
 @property (nonatomic, strong) IBOutlet AGSMapView *mapView;
-@property (nonatomic, strong) IBOutlet UIButton* infoButton; // map layers/subjects
+//@property (nonatomic, strong) IBOutlet UIButton* infoButton; // map layers/subjects
 @property (nonatomic, strong) UIPopoverController *popOverController;
 @property (weak, nonatomic) IBOutlet AGSMapView *legendButton;
+@property (weak, nonatomic) IBOutlet UIToolbar *detailsButton;
 
 // find address feature & call-out popup?
 //@property (nonatomic, strong) IBOutlet UISearchBar *searchBar;
@@ -98,15 +99,20 @@
 @property (strong,nonatomic) NSString * whoCalled;
 @property (nonatomic, strong) LayerInfo *mapViewLevelLayerInfo;
 
+@property BOOL firstTime; // first time mainviewcontroller is loaded
+@property BOOL wifiBoolean; // is wifi available?
+
 /****** METHODS ******/
 
 - (IBAction)presentTableOfContents:(id)sender;  // display layers
 - (IBAction)presentLegendViewController:(id)sender; // display legend
 - (IBAction)showCurrentLocation:(id)sender; // click to display where you are
+
+// TODO: hook this up to the new Details button
 - (IBAction)showWebDetails:(id)sender;
 
 - (void)changeMap:(id)sender; // display TableViewController for choosing a different SNAP map
-
+- (void)checkForLocationServices; // check GPS available
 
 @end
 

@@ -148,7 +148,7 @@
     
     NSString *string = layerInfo.layerName;
     
-    NSLog(@"layerName = %@", string);
+  //  NSLog(@"layerName = %@", string);
     
     NSString *trimmedString = [string stringByTrimmingCharactersInSet:
                                [NSCharacterSet whitespaceCharacterSet]];

@@ -25,7 +25,7 @@
 @implementation MainViewController
 
 @synthesize mapView = _mapView;
-@synthesize infoButton = _infoButton;
+//@synthesize infoButton = _infoButton;
 @synthesize legendButton = _legendButton;
 @synthesize tocViewController = _tocViewController;
 @synthesize popOverController = _popOverController;
@@ -42,8 +42,17 @@
 @synthesize currentMapLabel = _currentMapLabel;
 @synthesize layerName = _layerName;
 @synthesize legendInfo = _legendInfo;
+<<<<<<< HEAD
+@synthesize firstTime = _firstTime;
+@synthesize detailsButton = _detailsButton;
+@synthesize wifiBoolean = _wifiBoolean;
+=======
 @synthesize whoCalled = _whoCalled; // name of the viewcontroller triggering viewWillAppear; passed by NotificationCenter
+<<<<<<< HEAD
 @synthesize mapViewLevelLayerInfo = _mapViewLevelLayerInfo;
+=======
+>>>>>>> 2c2615ae86bfc7960f2543b757ce4380ea48ee82
+>>>>>>> a5134776ae88d4cc7085862ba3fa2f1e0aac3946
 
 #define kTiledLayerURL @"http://gis2.ers.usda.gov/ArcGIS/rest/services/Background_Cache/MapServer"
 #define kSnapRetailURL @"http://www.snapretailerlocator.com/ArcGIS/rest/services/retailer/MapServer" //SNAP retail locator
@@ -221,17 +230,96 @@
     }
 }
 
+#pragma mark Check GPS Location Services Available
+
+-(BOOL) checkLocationServices{
+    
+    BOOL gpsAvailable;
+    
+    if([CLLocationManager locationServicesEnabled]){
+        
+        NSLog(@"Location Services Enabled");
+        
+        // Switch through the possible location
+        // authorization states
+        switch([CLLocationManager authorizationStatus]){
+            case kCLAuthorizationStatusAuthorized:
+            {
+                NSLog(@"We have access to location services");
+                // CURRENT LOCATION marker: user's current location as starting point
+                [self.mapView.locationDisplay startDataSource];
+                //[self.mapView centerAtPoint:[self.mapView.locationDisplay mapLocation] animated:YES];
+                self.mapView.locationDisplay.autoPanMode = AGSLocationDisplayAutoPanModeDefault;
+            }
+                break;
+            case kCLAuthorizationStatusDenied:
+            {
+                NSLog(@"Location services denied by user");
+                
+                AGSPoint *newPoint = [AGSPoint pointWithX:-93.032201 y:49.636213 spatialReference:self.mapView.spatialReference];
+                [self.mapView centerAtPoint:newPoint animated:NO];
+            }
+                break;
+            case kCLAuthorizationStatusRestricted:
+            {
+                NSLog(@"Parental controls restrict location services");
+            }
+                break;
+            case kCLAuthorizationStatusNotDetermined:
+            {
+                NSLog(@"Unable to determine, possibly not available");
+            }
+        }
+        return gpsAvailable = YES;
+    }
+    else{
+        // TODO: locationServicesEnabled was set to NO -- this might be wrong; zoom to default Washington DC
+        NSLog(@"Location Services Are Disabled");
+        AGSPoint *newPoint = [AGSPoint pointWithX:-77.0300 y:38.8900 spatialReference:self.mapView.spatialReference];
+        [self.mapView centerAtPoint:newPoint animated:NO];
+        self.mapView.locationDisplay.autoPanMode = AGSLocationDisplayAutoPanModeDefault;
+        
+        return gpsAvailable = NO;
+    }
+}
+
+- (id) initWithCoder:(NSCoder*)aDecoder
+{
+    if ((self = [super initWithCoder:aDecoder])){
+        [self setUpSubViews];//same setupv for both Methods
+    }
+    return self;
+}
+
+- (void) setUpSubViews
+{
+    //here create your subviews hierarchy
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     
     // SET PROPERTIES
+<<<<<<< HEAD
+=======
+    [self setTitle:@"SNAP Atlas"];
+>>>>>>> a5134776ae88d4cc7085862ba3fa2f1e0aac3946
     [self setRestorationIdentifier:@"mainVC"];
     self.restorationClass = [self class];
     
-    // CHECK internet connection
-    BOOL wifiBoolean = [self checkForInternet];
+    if(_firstTime){
     
-    if(wifiBoolean == YES){
+        // CHECK internet connection and GPS
+        [self checkForLocationServices];
+    }
+    
+    if((self.mapView = nil)){
+  //      [self addSubView];
+    }
+    
+    self.wifiBoolean = [self checkForInternet];  // TODO: not retaining value, set it here
+    
+    if(self.wifiBoolean == YES){
         
         // MAP IS LOADING
         
@@ -242,7 +330,22 @@
         [self performSelector:@selector(stopIndicator)withObject:nil afterDelay:15.0]; // 15 seconds
         
         // map URL
+<<<<<<< HEAD
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMapNotification:) name:@"changedMapNotification" object:nil];
+=======
+        [[NSNotificationCenter defaultCenter]
+         addObserver:self
+         selector:@selector(handleMapNotification:)
+         name:@"changedMapNotification"
+         object:nil];
+        
+<<<<<<< HEAD
+        // LEGEND: calls method that adds the layer to the legend each time layer is loaded
+        //[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(respondToLayerLoaded:) name:AGSLayerDidLoadNotification object:nil];
+=======
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(respondToLayerLoaded:) name:AGSLayerDidLoadNotification object:nil];
+>>>>>>> 2c2615ae86bfc7960f2543b757ce4380ea48ee82
+>>>>>>> a5134776ae88d4cc7085862ba3fa2f1e0aac3946
         
        
         // layer name
@@ -261,19 +364,105 @@
         NSURL *mapUrl = [NSURL URLWithString:kTiledLayerURL];
         AGSTiledMapServiceLayer *tiledLyr = [AGSTiledMapServiceLayer tiledMapServiceLayerWithURL:mapUrl];
         [self.mapView addMapLayer:tiledLyr withName:@"Base Map"];
+<<<<<<< HEAD
+        
+        // TEST SNAP RETAIL LOCATOR see above for URL */
+        
+//        NSURL *retailUrl = [NSURL URLWithString:kSnapRetailURL];
+//        AGSDynamicMapServiceLayer *dynamicRetailLyr = [AGSDynamicMapServiceLayer dynamicMapServiceLayerWithURL:retailUrl];
+//        [self.mapView addMapLayer:dynamicRetailLyr withName:@"Retail Locations"];
+        
+        /* LOAD DYNAMIC MAP, default is Benefits */
+        
+        if(self.mapName.length == 0){
+           self.ersMapServiceURL = [NSURL URLWithString:@"http://gis2.ers.usda.gov/ArcGIS/rest/services/snap_Benefits/MapServer"];
+           // self.mapName = @"Benefits";
+//           // NSLog(@"map URL = %@", self.ersMapServiceURL);
+        }
+        else{
+            NSLog(@"map URL = %@", self.ersMapServiceURL); // use the value passed from MapPickerVC
+        }
+
+        NSError *error = nil;
+        AGSMapServiceInfo *info = [AGSMapServiceInfo mapServiceInfoWithURL:self.ersMapServiceURL error:&error];
+        
+        AGSDynamicMapServiceLayer* layer = [AGSDynamicMapServiceLayer dynamicMapServiceLayerWithMapServiceInfo: info];
+=======
                 
+<<<<<<< HEAD
     /* dynamic layer is loaded in viewWillAppear */
+=======
+        /* LOAD DYNAMIC MAP, default is Benefits */
+      
+       // load the default map now
+//        if(self.mapName.length == 0){
+//            self.ersMapServiceURL = [NSURL URLWithString:@"http://gis2.ers.usda.gov/ArcGIS/rest/services/snap_Benefits/MapServer"];
+//            self.mapName = @"Benefits";
+//           // NSLog(@"map URL = %@", self.ersMapServiceURL);
+//        }
+//        
+//        NSError *error = nil;
+//        AGSMapServiceInfo *info = [AGSMapServiceInfo mapServiceInfoWithURL:self.ersMapServiceURL error:&error];
+//        
+//        AGSDynamicMapServiceLayer* layer = [AGSDynamicMapServiceLayer dynamicMapServiceLayerWithMapServiceInfo: info];
+>>>>>>> 2c2615ae86bfc7960f2543b757ce4380ea48ee82
+        
+        // specifies which layer(s) are displayed on the map - this is different from what's displayed in the legend; without this code, nothing is displayed
+        
+        // this is the title of the layer in the TOC - mapName must match definition in Map class! changed dynamically
+        
+<<<<<<< HEAD
+        if(self.mapName.length !=0){
+            [self.mapView addMapLayer:layer withName:self.mapName];
+        }
+        else{
+            [self.mapView addMapLayer:layer withName:@"Benefits"];
+        }
+        
+        // modify this if the TOC view controller changes selection
+        if(layer.loaded)
+        {
+            // only show the Xth layer
+            layer.visibleLayers= [NSArray arrayWithObjects:[NSNumber numberWithInt:0], nil];
+            layer.opacity = .8;
+            
+    /* TRY JUST adding the legend source for this object here to streamline the code */
+            [self.legendDataSource addLegendForLayer:layer];
+        }
+=======
+//        if(self.mapName.length !=0){
+//            [self.mapView addMapLayer:layer withName:self.mapName];
+//        }
+//        else{
+//            [self.mapView addMapLayer:layer withName:@"Benefits"];
+//        }
+//        
+//        // modify this if the TOC view controller changes selection
+//        if(layer.loaded)
+//        {
+//            // only show the Xth layer
+//            layer.visibleLayers= [NSArray arrayWithObjects:[NSNumber numberWithInt:0], nil];
+//            layer.opacity = .8;
+//            
+//            // LEGEND: calls method that adds the layer to the legend each time layer is loaded -- is this in the right place?
+        //    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(respondToLayerLoaded:) name:AGSLayerDidLoadNotification object:nil];
+//        }
+>>>>>>> 2c2615ae86bfc7960f2543b757ce4380ea48ee82
+>>>>>>> a5134776ae88d4cc7085862ba3fa2f1e0aac3946
         
        /* STATES */
-        
-        NSURL *stateMapUrl = [NSURL URLWithString:kMapServiceURL];
+       NSURL *stateMapUrl = [NSURL URLWithString:kMapServiceURL];
         AGSDynamicMapServiceLayer *dynamicLyr = [AGSDynamicMapServiceLayer dynamicMapServiceLayerWithURL:stateMapUrl];
         [self.mapView addMapLayer:dynamicLyr withName:@"States"];
+<<<<<<< HEAD
         
         // ADD THE LEGEND OBSERVER
         // add legend for a layer; moving it here doesn't make a difference, it still adds it for every layer
        // [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(respondToLayerLoaded:) name:AGSLayerDidLoadNotification object:nil];
         
+=======
+    
+>>>>>>> a5134776ae88d4cc7085862ba3fa2f1e0aac3946
         //Zooming to an initial envelope with the specified spatial reference of the map.
         AGSSpatialReference *sr = [AGSSpatialReference webMercatorSpatialReference];
         AGSEnvelope *env = [AGSEnvelope envelopeWithXmin:-14314526
@@ -283,6 +472,29 @@
                                         spatialReference:sr];
         //[self.mapView zoomToEnvelope:env animated:YES];
         
+<<<<<<< HEAD
+=======
+        // ADDED FOR GEOCODING FIND ADDRESS, also need for popup location!
+        
+        //set the delegate on the mapView so we get notifications for user interaction with the callout for geocoding
+        self.mapView.callout.delegate = self;
+<<<<<<< HEAD
+
+        /* NEW CODE */
+        // layers
+        self.mapView.layerDelegate = self;
+        
+        // TODO: needed for the callout ??
+        // create the graphics layer that the geocoding result
+        // will be stored in and add it to the map
+     //   self.graphicsLayer = [AGSGraphicsLayer graphicsLayer];
+     //   [self.mapView addMapLayer:self.graphicsLayer withName:@"Search Layer"];
+=======
+        
+        // layers
+        self.mapView.layerDelegate = self;
+        
+>>>>>>> a5134776ae88d4cc7085862ba3fa2f1e0aac3946
         //create the toc view controller, toc view controller changes visibility of the mapView without calling this viewDidLoad method
         
         self.tocViewController = [[TOCViewController alloc]init];
@@ -330,6 +542,7 @@
                     [self.mapView centerAtPoint:newPoint animated:NO];
                     self.mapView.locationDisplay.autoPanMode = AGSLocationDisplayAutoPanModeDefault;
               }
+>>>>>>> 2c2615ae86bfc7960f2543b757ce4380ea48ee82
         
         // TODO: ADD THE LEGEND OBSERVER -- this results in a lot of extra processing because it's called for each layer and for every time viewWillAppear is called; skip it for now
      // add legend for a layer;
@@ -348,8 +561,35 @@
         self.mapView.touchDelegate = self;
         self.mapView.showMagnifierOnTapAndHold = YES;
         self.mapView.allowMagnifierToPanMap = YES;
+<<<<<<< HEAD
+=======
+ 
+        //TODO: have to move this because the mapServiceURL will change on viewWillAppear??
+        //create identify task
+        self.identifyTask = [AGSIdentifyTask identifyTaskWithURL:self.ersMapServiceURL];
+        self.identifyTask.delegate = self;
+        
+        //create identify parameters
+        self.identifyParams = [[AGSIdentifyParameters alloc] init];
+<<<<<<< HEAD
+        
+        self.mapView.showMagnifierOnTapAndHold = YES;
+        self.mapView.allowMagnifierToPanMap = YES;
+        
+        // CCLocationManager
+        /* not used, can be used to find distance between points */
+//        self.locationManager = [[CLLocationManager alloc]init];
+//        self.locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+//        self.locationManager.delegate = self;
+//        [self.locationManager startUpdatingLocation];
+//        self.startLocation = nil;
+        
+        self.firstTime = NO;
+=======
+>>>>>>> 2c2615ae86bfc7960f2543b757ce4380ea48ee82
+>>>>>>> a5134776ae88d4cc7085862ba3fa2f1e0aac3946
     }
-    else{
+    else if (self.wifiBoolean == NO){
         NSLog(@"main viewDidLoad:no wifi available");
         
         NSString *titleString = @"No Internet Connection";
@@ -358,6 +598,70 @@
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:titleString message:messageString
                                                        delegate:self cancelButtonTitle:@"OK" otherButtonTitles:  nil];
         [alert show];
+        
+        self.wifiBoolean = NO;
+    }
+}
+
+-(void)mapViewDidLoad:(AGSMapView *)mapView{
+    NSLog(@"map loaded");
+    
+}
+
+#pragma mark - Check GPS location services
+
+-(void) checkForLocationServices{
+    
+    if([CLLocationManager locationServicesEnabled]){
+        
+        NSLog(@"Location Services Enabled");
+        
+        // Switch through the possible location
+        // authorization states
+        switch([CLLocationManager authorizationStatus]){
+            case kCLAuthorizationStatusAuthorized:
+            {
+                NSLog(@"We have access to location services");
+                // CURRENT LOCATION marker: user's current location as starting point
+                [self.mapView.locationDisplay startDataSource];
+                //[self.mapView centerAtPoint:[self.mapView.locationDisplay mapLocation] animated:YES];
+                self.mapView.locationDisplay.autoPanMode = AGSLocationDisplayAutoPanModeDefault;
+            }
+                break;
+            case kCLAuthorizationStatusDenied:
+            {
+                NSLog(@"Location services denied by user");
+                
+                AGSPoint *newPoint = [AGSPoint pointWithX:-93.032201 y:49.636213 spatialReference:self.mapView.spatialReference];
+                [self.mapView centerAtPoint:newPoint animated:NO];
+            }
+                break;
+            case kCLAuthorizationStatusRestricted:
+            {
+                NSLog(@"Parental controls restrict location services");
+            }
+                break;
+            case kCLAuthorizationStatusNotDetermined:
+            {
+                NSLog(@"Unable to determine, possibly not available");
+            }
+        }
+    }
+    else{
+        // TODO: locationServicesEnabled was set to NO -- this might be wrong
+        NSLog(@"Location Services Are Disabled");
+        AGSPoint *newPoint = [AGSPoint pointWithX:-77.0300 y:38.8900 spatialReference:self.mapView.spatialReference];
+        [self.mapView centerAtPoint:newPoint animated:NO];
+        self.mapView.locationDisplay.autoPanMode = AGSLocationDisplayAutoPanModeDefault;
+        
+        NSString *titleString = @"Location Services";
+        NSString *messageString = @"I can't find your current location,did you disable location services?";
+        
+        
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:titleString message:messageString
+                                                       delegate:self cancelButtonTitle:@"OK" otherButtonTitles:  nil];
+        [alert show];
+
     }
 }
 
@@ -577,7 +881,7 @@
     //store for later use
     self.mappoint = mappoint;
     
-    NSLog(@"AGSPoint = %@", mappoint);
+  //  NSLog(@"AGSPoint = %@", mappoint);
     
     // TODO: why is this hard coded to 1???
 	self.identifyParams.layerIds = [NSArray arrayWithObjects:[NSNumber numberWithInt:1], nil];
@@ -703,12 +1007,58 @@
 
 #pragma mark - cleanup and startup
 
+<<<<<<< HEAD
+// ([self isDismissing] || [self isMovingFromParentViewController])
+
+//-(void)viewWillDisappear:(BOOL)animated{
+//    
+//    if([self isBeingDismissed]){
+//        NSLog(@"covered: I am being dismissed");
+//    }
+//    if([self isMovingFromParentViewController]){
+//        NSLog(@"pushed: I am moving From my ParentViewController");
+//        [self.mapView removeFromSuperview];
+//        self.mapView = nil;
+//    }
+//    if([self isMovingToParentViewController]){
+//        NSLog(@"moving TO parent");
+//    }
+//}
+
+- (void) setView:(UIView*) view{
+    [super setView:view];
+    NSLog(@"setView reached");
+}
+
+=======
+>>>>>>> 2c2615ae86bfc7960f2543b757ce4380ea48ee82
 // destroy the legend data source so that when the user selects a different layer, the legend items only appear once
 -(void)viewDidDisappear:(BOOL)animated{
     
     if(![self.legendDataSource isEqual:nil]){
         self.legendDataSource = nil;
     }
+<<<<<<< HEAD
+    if([self isBeingDismissed]){
+        NSLog(@"covered: MainVC is being dismissed");
+    }
+    if([self isMovingFromParentViewController]){
+        NSLog(@"pushed: I am moving From my ParentViewController");
+       // [self.mapView removeFromSuperview];
+       // self.mapView = nil;  // THIS IS CALLED THE SECOND TIME
+    }
+    if([self isMovingToParentViewController]){
+        NSLog(@"moving TO parent from MainVC");
+    }
+    else{
+        NSLog(@"unspecified in MainVC");
+    }
+    
+    // this approach releases memory, but the TOC ViewController fails, not sure why
+    [self.mapView removeFromSuperview];
+     self.mapView = nil;
+=======
+>>>>>>> 2c2615ae86bfc7960f2543b757ce4380ea48ee82
 }
 
 -(void)viewWillDisappear:(BOOL)animated {
@@ -758,8 +1108,13 @@
         self.mappoint = nil;
         self.graphic = nil;
     
+<<<<<<< HEAD
+        [self.mapView removeFromSuperview];
+        // self.mapView = nil;
+=======
         [[NSNotificationCenter defaultCenter] removeObserver:self];
         self.view = nil;
+>>>>>>> 2c2615ae86bfc7960f2543b757ce4380ea48ee82
         NSLog(@"didReceiveMemoryWarning in MainVC");
     }
 }
@@ -811,4 +1166,8 @@
 
 
 
+- (void)viewDidUnload {
+    [self setDetailsButton:nil];
+    [super viewDidUnload];
+}
 @end

@@ -39,12 +39,12 @@
     [self.webView loadRequest:request];
 }
 
-
+//don't create a new one
 - (IBAction)goBack:(id)sender {
     
-    MainViewController *mainVC = [[MainViewController alloc]initWithNibName:@"MainViewController" bundle:nil];
+   // MainViewController *mainVC = [[MainViewController alloc]initWithNibName:@"MainViewController" bundle:nil];
     
-    [self.navigationController pushViewController:mainVC animated:YES];
+   // [self.navigationController pushViewController:mainVC animated:YES];
     //[self presentViewController:mainVC animated:YES completion:nil];
 }
 

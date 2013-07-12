@@ -41,6 +41,10 @@
 						<int key="NSvFlags">274</int>
 						<string key="NSFrameSize">{320, 548}</string>
 						<reference key="NSSuperview" ref="191373211"/>
+<<<<<<< HEAD
+						<reference key="NSWindow"/>
+=======
+>>>>>>> 2c2615ae86bfc7960f2543b757ce4380ea48ee82
 						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<object class="NSColor" key="IBUIBackgroundColor">

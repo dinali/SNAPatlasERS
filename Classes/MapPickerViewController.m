@@ -61,6 +61,23 @@
 }
 
 
+<<<<<<< HEAD
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+     if(self.view!=nil){
+         self.aMap = nil;
+         tableDataArray = nil;
+         imagesArray = nil;
+         webURL = nil;
+         self.view = nil;
+     }
+    [self.view removeFromSuperview];
+    // self.mapView = nil;
+    NSLog(@"MapPicker, didReceiveMemoryWarning");
+}
+=======
+>>>>>>> 2c2615ae86bfc7960f2543b757ce4380ea48ee82
 
 #pragma mark - Table view data source
 

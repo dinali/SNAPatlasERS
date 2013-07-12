@@ -18,6 +18,7 @@
 
 @synthesize window;
 @synthesize viewController;
+@synthesize firstRun;
 //@synthesize pickerNavigationController;
 
 /*
@@ -41,6 +42,7 @@
    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     
     viewController = [[MainViewController alloc] initWithNibName:@"MainViewController" bundle:nil];
+    viewController.firstTime = YES;
     
     // set mainvc as the root
     UINavigationController *navController = [[UINavigationController alloc]initWithRootViewController:viewController];
@@ -73,6 +75,10 @@
      Free up as much memory as possible by purging cached data objects that can be recreated (or reloaded from disk) later.
      */
     NSLog(@"applicationDidReceiveMemoryWarning");
+<<<<<<< HEAD
+    [self.viewController removeFromParentViewController];
+=======
+>>>>>>> 2c2615ae86bfc7960f2543b757ce4380ea48ee82
 }
 
 @end
